@@ -14,7 +14,8 @@ plugins {
     id("net.kyori.indra.licenser.spotless") version "3.0.1"
     id("net.ltgt.errorprone") version "3.0.1"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("fr.xpdustry.toxopid") version "3.0.0"
+    // Testing :)
+    id("fr.xpdustry.toxopid") version "3.1.0-SNAPSHOT"
 }
 
 val metadata = ModMetadata.fromJson(file("plugin.json").readText())

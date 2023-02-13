@@ -1,13 +1,13 @@
 {
-  "name": "template",
-  "displayName": "TemplatePlugin",
+  "name": "hexed-reloaded",
+  "displayName": "HexedPluginReloaded",
   "author": "Xpdustry",
-  "description": "A template for faster plugin development.",
-  "version": "3.4.1",
-  "minGameVersion": "140",
+  "description": "A reimplementation of the hex gamemode, with more features and better performances.",
+  "version": "1.0.0",
+  "minGameVersion": "141",
   "hidden": true,
   "java": true,
-  "main": "fr.xpdustry.template.TemplatePlugin",
-  "repo": "Xpdustry/TemplatePlugin",
+  "main": "fr.xpdustry.hexed.HexedPluginReloaded",
+  "repo": "Xpdustry/HexedPluginReloaded",
   "dependencies": []
 }
