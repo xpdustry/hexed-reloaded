@@ -34,10 +34,16 @@ toxopid {
 repositories {
     mavenCentral()
     anukenJitpack()
+    maven("https://maven.xpdustry.fr/snapshots") {
+        mavenContent { snapshotsOnly() }
+    }
 }
+
+val mindustryRuntime = configurations.register("mindustryRuntime")
 
 dependencies {
     mindustryDependencies()
+    compileOnly("fr.xpdustry:distributor-api:3.0.0-SNAPSHOT")
 
     val junit = "5.9.0"
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junit")
@@ -51,6 +57,14 @@ dependencies {
     // Static analysis
     annotationProcessor("com.uber.nullaway:nullaway:0.10.6")
     errorprone("com.google.errorprone:error_prone_core:2.17.0")
+    mindustryRuntime.configure {
+        invoke(
+            group = "fr.xpdustry",
+            name = "distributor-core",
+            version = "3.0.0-SNAPSHOT",
+            classifier = "plugin"
+        )
+    }
 }
 
 tasks.withType(JavaCompile::class.java).configureEach {
@@ -107,6 +121,14 @@ tasks.shadowJar {
 tasks.build {
     // Make sure the shadow jar is built during the build task
     dependsOn(tasks.shadowJar)
+}
+
+tasks.runMindustryServer {
+    mods.setFrom(tasks.shadowJar, mindustryRuntime)
+}
+
+tasks.runMindustryClient {
+    mods.setFrom()
 }
 
 signing {
