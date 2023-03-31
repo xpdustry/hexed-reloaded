@@ -14,8 +14,7 @@ plugins {
     id("net.kyori.indra.licenser.spotless") version "3.0.1"
     id("net.ltgt.errorprone") version "3.0.1"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    // Testing :)
-    id("fr.xpdustry.toxopid") version "3.1.0-SNAPSHOT"
+    id("fr.xpdustry.toxopid") version "3.1.0"
 }
 
 val metadata = ModMetadata.fromJson(file("plugin.json").readText())
@@ -34,16 +33,27 @@ toxopid {
 repositories {
     mavenCentral()
     anukenJitpack()
+    maven("https://maven.xpdustry.fr/releases") {
+        name = "xpdustry-releases"
+        mavenContent { releasesOnly() }
+    }
     maven("https://maven.xpdustry.fr/snapshots") {
+        name = "xpdustry-snapshots"
         mavenContent { snapshotsOnly() }
     }
 }
 
-val mindustryRuntime = configurations.register("mindustryRuntime")
+val mindustryRuntime = configurations.register("mindustryRuntime") {
+    resolutionStrategy {
+        cacheDynamicVersionsFor(0, TimeUnit.SECONDS)
+        cacheChangingModulesFor(0, TimeUnit.SECONDS)
+    }
+}
 
 dependencies {
     mindustryDependencies()
     compileOnly("fr.xpdustry:distributor-api:3.0.0-SNAPSHOT")
+    implementation("fr.xpdustry:nucleus-mindustry-testing:2023.3.2")
 
     val junit = "5.9.0"
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junit")
@@ -65,70 +75,6 @@ dependencies {
             classifier = "plugin"
         )
     }
-}
-
-tasks.withType(JavaCompile::class.java).configureEach {
-    options.errorprone {
-        disableWarningsInGeneratedCode.set(true)
-        disable(
-            "MissingSummary",
-            "FutureReturnValueIgnored",
-            "InlineMeSuggester",
-            "EmptyCatch"
-        )
-        if (!name.contains("test", true)) {
-            check("NullAway", CheckSeverity.ERROR)
-            option("NullAway:AnnotatedPackages", project.property("props.root-package").toString())
-            option("NullAway:TreatGeneratedAsUnannotated", true)
-        }
-    }
-}
-
-// Required for the GitHub actions
-tasks.register("getArtifactPath") {
-    doLast { println(tasks.shadowJar.get().archiveFile.get().toString()) }
-}
-
-// Relocates dependencies
-val relocate = tasks.register<ConfigureShadowRelocation>("relocateShadowJar") {
-    target = tasks.shadowJar.get()
-    prefix = project.property("props.root-package").toString() + ".shadow"
-}
-
-tasks.shadowJar {
-    // Makes sure the name of the final jar is (plugin-display-name).jar
-    archiveFileName.set(metadata.displayName + ".jar")
-    // Set the classifier to plugin for publication on a maven repository
-    archiveClassifier.set("plugin")
-    // Configure the dependencies shading
-    dependsOn(relocate)
-    // Reduce shadow jar size by removing unused classes.
-    // Warning, if one of your dependencies use service loaders or reflection, add to the exclude list
-    // such as "minimize { exclude(dependency("some.group:some-dependency:.*")) }"
-    minimize()
-    // Include the plugin.json file with the modified version
-    doFirst {
-        val temp = temporaryDir.resolve("plugin.json")
-        temp.writeText(metadata.toJson(true))
-        from(temp)
-    }
-    // Include the license of your project
-    from(rootProject.file("LICENSE.md")) {
-        into("META-INF")
-    }
-}
-
-tasks.build {
-    // Make sure the shadow jar is built during the build task
-    dependsOn(tasks.shadowJar)
-}
-
-tasks.runMindustryServer {
-    mods.setFrom(tasks.shadowJar, mindustryRuntime)
-}
-
-tasks.runMindustryClient {
-    mods.setFrom()
 }
 
 signing {
@@ -201,4 +147,68 @@ indraSpotlessLicenser {
     property("DESCRIPTION", metadata.description)
     property("AUTHOR", metadata.author)
     property("YEAR", property("props.project-year").toString())
+}
+
+tasks.withType(JavaCompile::class.java).configureEach {
+    options.errorprone {
+        disableWarningsInGeneratedCode.set(true)
+        disable(
+            "MissingSummary",
+            "FutureReturnValueIgnored",
+            "InlineMeSuggester",
+            "EmptyCatch"
+        )
+        if (!name.contains("test", true)) {
+            check("NullAway", CheckSeverity.ERROR)
+            option("NullAway:AnnotatedPackages", project.property("props.root-package").toString())
+            option("NullAway:TreatGeneratedAsUnannotated", true)
+        }
+    }
+}
+
+// Required for the GitHub actions
+tasks.register("getArtifactPath") {
+    doLast { println(tasks.shadowJar.get().archiveFile.get().toString()) }
+}
+
+// Relocates dependencies
+val relocate = tasks.register<ConfigureShadowRelocation>("relocateShadowJar") {
+    target = tasks.shadowJar.get()
+    prefix = project.property("props.root-package").toString() + ".shadow"
+}
+
+tasks.shadowJar {
+    // Makes sure the name of the final jar is (plugin-display-name).jar
+    archiveFileName.set(metadata.displayName + ".jar")
+    // Set the classifier to plugin for publication on a maven repository
+    archiveClassifier.set("plugin")
+    // Configure the dependencies shading
+    dependsOn(relocate)
+    // Reduce shadow jar size by removing unused classes.
+    // Warning, if one of your dependencies use service loaders or reflection, add to the exclude list
+    // such as "minimize { exclude(dependency("some.group:some-dependency:.*")) }"
+    minimize()
+    // Include the plugin.json file with the modified version
+    doFirst {
+        val temp = temporaryDir.resolve("plugin.json")
+        temp.writeText(metadata.toJson(true))
+        from(temp)
+    }
+    // Include the license of your project
+    from(rootProject.file("LICENSE.md")) {
+        into("META-INF")
+    }
+}
+
+tasks.build {
+    // Make sure the shadow jar is built during the build task
+    dependsOn(tasks.shadowJar)
+}
+
+tasks.runMindustryServer {
+    mods.setFrom(tasks.shadowJar, mindustryRuntime)
+}
+
+tasks.runMindustryClient {
+    mods.setFrom()
 }

@@ -4,7 +4,7 @@
   "author": "Xpdustry",
   "description": "A reimplementation of the hexed gamemode, with more features and better performances.",
   "version": "1.0.0",
-  "minGameVersion": "141",
+  "minGameVersion": "142",
   "hidden": true,
   "java": true,
   "main": "fr.xpdustry.hexed.HexedPluginReloaded",

@@ -23,7 +23,7 @@ import arc.util.Align;
 import arc.util.Interval;
 import arc.util.Strings;
 import arc.util.Time;
-import fr.xpdustry.distributor.api.event.MoreEvents;
+import fr.xpdustry.distributor.api.event.EventHandler;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
 import fr.xpdustry.hexed.event.HexCaptureEvent;
 import fr.xpdustry.hexed.model.Hex;
@@ -45,14 +45,12 @@ public final class HexedRenderer implements PluginListener {
         this.hexed = hexed;
     }
 
-    @Override
-    public void onPluginInit() {
-        MoreEvents.subscribe(
-                HexCaptureEvent.class,
-                event -> Call.warningToast(
-                        Iconc.warning,
-                        "Hex #" + event.hex().getIdentifier() + " captured by "
-                                + event.player().name()));
+    @EventHandler
+    public void onHexCapture(final HexCaptureEvent event) {
+        Call.warningToast(
+                Iconc.warning,
+                "Hex #" + event.hex().getIdentifier() + " captured by "
+                        + event.player().name());
     }
 
     @Override
@@ -115,7 +113,7 @@ public final class HexedRenderer implements PluginListener {
     }
 
     private void updateDuration() {
-        // TODO Spotless is being funky, cleanup
+        // TODO Spotless is being funky, cleanup, lol
         Call.infoPopup(
                 "Time: "
                         + Strings.formatMillis(Math.max(

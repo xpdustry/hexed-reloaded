@@ -24,8 +24,9 @@ import arc.util.Interval;
 import arc.util.Log;
 import arc.util.Time;
 import fr.xpdustry.distributor.api.DistributorProvider;
-import fr.xpdustry.distributor.api.event.MoreEvents;
+import fr.xpdustry.distributor.api.event.EventHandler;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
+import fr.xpdustry.distributor.api.scheduler.MindustryTimeUnit;
 import fr.xpdustry.hexed.event.HexCaptureEvent;
 import fr.xpdustry.hexed.generator.AnukenHexGenerator;
 import fr.xpdustry.hexed.generator.HexGenerator;
@@ -35,7 +36,6 @@ import mindustry.content.Items;
 import mindustry.core.GameState.State;
 import mindustry.game.EventType;
 import mindustry.game.EventType.GameOverEvent;
-import mindustry.game.EventType.PlayerLeave;
 import mindustry.game.Gamemode;
 import mindustry.game.Rules;
 import mindustry.game.Team;
@@ -89,45 +89,48 @@ public final class HexedLogic implements PluginListener {
     public void onPluginInit() {
         final var parent = Vars.netServer.assigner;
         Vars.netServer.assigner = new HexedTeamAssigner(this.hexed, parent);
+    }
 
-        MoreEvents.subscribe(EventType.PlayerJoin.class, event -> {
-            if (!this.hexed.isActive() || event.player.team() == Team.derelict) {
-                return;
-            }
-            final var hexes = this.hexed.getHexedState().getHexes().stream()
-                    .filter(hex -> this.hexed.getHexedState().getController(hex) == null
-                            && this.hexed.getHexedState().canSpawn(hex))
-                    .toList();
+    @EventHandler
+    public void onPlayerJoin(final EventType.PlayerJoin event) {
+        if (!this.hexed.isActive() || event.player.team() == Team.derelict) {
+            return;
+        }
+        final var hexes = this.hexed.getHexedState().getHexes().stream()
+                .filter(hex -> this.hexed.getHexedState().getController(hex) == null
+                        && this.hexed.getHexedState().canSpawn(hex))
+                .toList();
 
-            if (hexes.isEmpty()) {
-                Call.infoMessage(
-                        event.player.con(),
-                        "There are currently no empty hex spaces available.\nAssigning into spectator mode.");
-                event.player.unit().kill();
-                event.player.team(Team.derelict);
-            } else {
-                final var hex = hexes.get(Mathf.random(0, hexes.size() - 1));
-                placeLoadout(event.player, hex.getTileX(), hex.getTileY());
+        if (hexes.isEmpty()) {
+            Call.infoMessage(
+                    event.player.con(),
+                    "There are currently no empty hex spaces available.\nAssigning into spectator mode.");
+            event.player.unit().kill();
+            event.player.team(Team.derelict);
+        } else {
+            final var hex = hexes.get(Mathf.random(0, hexes.size() - 1));
+            placeLoadout(event.player, hex.getTileX(), hex.getTileY());
+            this.hexed.getHexedState().updateProgress(hex);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerLeave(final EventType.PlayerLeave event) {
+        if (this.hexed.isActive() && event.player.team() != Team.derelict) {
+            this.killTeam(event.player.team());
+        }
+    }
+
+    @EventHandler
+    public void onBlockDestroy(final EventType.BlockDestroyEvent event) {
+        // reset last spawn times so this hex becomes vacant for a while.
+        if (this.hexed.isActive() && event.tile.block() instanceof CoreBlock) {
+            final var hex = this.hexed.getHexedState().getHex(event.tile.x, event.tile.y);
+            if (hex != null) {
+                this.hexed.getHexedState().resetSpawnTimer(hex);
                 this.hexed.getHexedState().updateProgress(hex);
             }
-        });
-
-        MoreEvents.subscribe(EventType.BlockDestroyEvent.class, event -> {
-            // reset last spawn times so this hex becomes vacant for a while.
-            if (this.hexed.isActive() && event.tile.block() instanceof CoreBlock) {
-                final var hex = this.hexed.getHexedState().getHex(event.tile.x, event.tile.y);
-                if (hex != null) {
-                    this.hexed.getHexedState().resetSpawnTimer(hex);
-                    this.hexed.getHexedState().updateProgress(hex);
-                }
-            }
-        });
-
-        MoreEvents.subscribe(PlayerLeave.class, event -> {
-            if (this.hexed.isActive() && event.player.team() != Team.derelict) {
-                this.killTeam(event.player.team());
-            }
-        });
+        }
     }
 
     @Override
@@ -177,7 +180,7 @@ public final class HexedLogic implements PluginListener {
                         this.hexed.getLogger().warn("Team {} has not player.", newController.name);
                         continue;
                     }
-                    MoreEvents.post(new HexCaptureEvent(player, hex));
+                    DistributorProvider.get().getEventBus().post(new HexCaptureEvent(player, hex));
                 }
             }
         }
@@ -218,7 +221,7 @@ public final class HexedLogic implements PluginListener {
                     DistributorProvider.get()
                             .getPluginScheduler()
                             .scheduleSync(this.hexed)
-                            .delay(Mathf.random(6 * 60))
+                            .delay(Mathf.random(6 * 60), MindustryTimeUnit.TICKS)
                             .execute(() -> {
                                 // We never know
                                 if (tile.build != null && tile.team() == team) {
@@ -231,7 +234,7 @@ public final class HexedLogic implements PluginListener {
         DistributorProvider.get()
                 .getPluginScheduler()
                 .scheduleAsync(this.hexed)
-                .delay(8 * 60)
+                .delay(8, MindustryTimeUnit.SECONDS)
                 .execute(() -> this.hexed.getHexedState().setDying(team, false));
     }
 
@@ -250,7 +253,7 @@ public final class HexedLogic implements PluginListener {
                 maxTeam = team.team;
             }
         }
-        MoreEvents.post(new GameOverEvent(maxTeam));
+        DistributorProvider.get().getEventBus().post(new GameOverEvent(maxTeam));
     }
 
     private void placeLoadout(final Player player, int x, int y) {

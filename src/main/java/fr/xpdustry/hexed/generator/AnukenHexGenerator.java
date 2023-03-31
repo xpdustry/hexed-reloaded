@@ -143,10 +143,13 @@ public final class AnukenHexGenerator implements HexGenerator {
                 Tmp.v1.trnsExact(f, SPACING + 12);
                 if (Structs.inBounds(x + (int) Tmp.v1.x, y + (int) Tmp.v1.y, WIDTH, HEIGHT)) {
                     Tmp.v1.trnsExact(f, SPACING / 2f + 7);
-                    Bresenham2.line(x, y, x + (int) Tmp.v1.x, y + (int) Tmp.v1.y, (cx, cy) -> {
-                        Geometry.circle(cx, cy, WIDTH, HEIGHT, 3, (c2x, c2y) -> tiles.getn(c2x, c2y)
-                                .setBlock(Blocks.air));
-                    });
+                    Bresenham2.line(
+                            x,
+                            y,
+                            x + (int) Tmp.v1.x,
+                            y + (int) Tmp.v1.y,
+                            (cx, cy) -> Geometry.circle(cx, cy, WIDTH, HEIGHT, 3, (c2x, c2y) -> tiles.getn(c2x, c2y)
+                                    .setBlock(Blocks.air)));
                 }
             }
         }
@@ -204,7 +207,7 @@ public final class AnukenHexGenerator implements HexGenerator {
             for (int y = 0; y < HEIGHT / (h / 2) - 2; y++) {
                 final int cx = (int) (x * SPACING * 1.5 + (y % 2) * SPACING * 3.0 / 4) + SPACING / 2;
                 final int cy = (int) (y * h / 2) + SPACING / 2;
-                hexes.add(new Hexagon(y + (int) (x * ((HEIGHT / (h / 2) - 2))), cx, cy, DIAMETER));
+                hexes.add(new Hexagon(y + (int) (x * (HEIGHT / (h / 2) - 2)), cx, cy, DIAMETER));
             }
         }
         return hexes;
