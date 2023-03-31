@@ -19,30 +19,30 @@
 package fr.xpdustry.hexed;
 
 import arc.math.Mathf;
-import arc.util.CommandHandler;
 import arc.util.Interval;
-import arc.util.Log;
 import arc.util.Time;
 import fr.xpdustry.distributor.api.DistributorProvider;
 import fr.xpdustry.distributor.api.event.EventHandler;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
 import fr.xpdustry.distributor.api.scheduler.MindustryTimeUnit;
+import fr.xpdustry.distributor.api.scheduler.TaskHandler;
+import fr.xpdustry.distributor.api.util.ArcCollections;
 import fr.xpdustry.hexed.event.HexCaptureEvent;
-import fr.xpdustry.hexed.generator.AnukenHexGenerator;
-import fr.xpdustry.hexed.generator.HexGenerator;
+import fr.xpdustry.hexed.event.HexLostEvent;
+import fr.xpdustry.hexed.event.HexPlayerJoinEvent;
+import fr.xpdustry.hexed.event.HexPlayerQuitEvent;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collector;
 import mindustry.Vars;
 import mindustry.content.Blocks;
-import mindustry.content.Items;
-import mindustry.core.GameState.State;
 import mindustry.game.EventType;
 import mindustry.game.EventType.GameOverEvent;
-import mindustry.game.Gamemode;
-import mindustry.game.Rules;
 import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
-import mindustry.type.ItemStack;
 import mindustry.world.blocks.storage.CoreBlock;
 
 public final class HexedLogic implements PluginListener {
@@ -57,34 +57,6 @@ public final class HexedLogic implements PluginListener {
         this.hexed = hexed;
     }
 
-    private Rules createHexedRules() {
-        final var rules = new Rules();
-        Gamemode.pvp.apply(rules);
-        rules.pvp = true;
-        rules.tags.put(HexedPluginReloaded.HEXED_PRESENCE_FLAG, "true");
-        rules.loadout = ItemStack.list(
-                Items.copper,
-                300,
-                Items.lead,
-                500,
-                Items.graphite,
-                150,
-                Items.metaglass,
-                150,
-                Items.silicon,
-                150,
-                Items.plastanium,
-                50);
-        rules.buildCostMultiplier = 1f;
-        rules.buildSpeedMultiplier = 0.75F;
-        rules.blockHealthMultiplier = 1.2f;
-        rules.unitBuildSpeedMultiplier = 1f;
-        rules.polygonCoreProtection = true;
-        rules.unitDamageMultiplier = 1.1f;
-        rules.canGameOver = false;
-        return rules;
-    }
-
     @Override
     public void onPluginInit() {
         final var parent = Vars.netServer.assigner;
@@ -93,9 +65,21 @@ public final class HexedLogic implements PluginListener {
 
     @EventHandler
     public void onPlayerJoin(final EventType.PlayerJoin event) {
-        if (!this.hexed.isActive() || event.player.team() == Team.derelict) {
+        DistributorProvider.get().getEventBus().post(new HexPlayerJoinEvent(event.player, true));
+    }
+
+    @EventHandler
+    public void onPlayerJoin(final HexPlayerJoinEvent event) {
+        if (!this.hexed.isActive()) {
             return;
         }
+        if (!event.real()) {
+            event.player().team(Vars.netServer.assignTeam(event.player()));
+        }
+        if (event.player().team() == Team.derelict) {
+            return;
+        }
+
         final var hexes = this.hexed.getHexedState().getHexes().stream()
                 .filter(hex -> this.hexed.getHexedState().getController(hex) == null
                         && this.hexed.getHexedState().canSpawn(hex))
@@ -103,21 +87,28 @@ public final class HexedLogic implements PluginListener {
 
         if (hexes.isEmpty()) {
             Call.infoMessage(
-                    event.player.con(),
+                    event.player().con(),
                     "There are currently no empty hex spaces available.\nAssigning into spectator mode.");
-            event.player.unit().kill();
-            event.player.team(Team.derelict);
+            event.player().unit().kill();
+            event.player().team(Team.derelict);
         } else {
             final var hex = hexes.get(Mathf.random(0, hexes.size() - 1));
-            placeLoadout(event.player, hex.getTileX(), hex.getTileY());
+            placeLoadout(event.player(), hex.getTileX(), hex.getTileY());
             this.hexed.getHexedState().updateProgress(hex);
         }
     }
 
     @EventHandler
     public void onPlayerLeave(final EventType.PlayerLeave event) {
-        if (this.hexed.isActive() && event.player.team() != Team.derelict) {
-            this.killTeam(event.player.team());
+        DistributorProvider.get().getEventBus().post(new HexPlayerQuitEvent(event.player, event.player.team(), true));
+    }
+
+    @EventHandler
+    public void onPlayerQuit(final HexPlayerQuitEvent event) {
+        if (this.hexed.isActive()) {
+            this.killTeam(event.player().team());
+            event.player().team(Team.derelict);
+            event.player().clearUnit();
         }
     }
 
@@ -133,30 +124,11 @@ public final class HexedLogic implements PluginListener {
         }
     }
 
-    @Override
-    public void onPluginServerCommandsRegistration(final CommandHandler handler) {
-        // TODO Move the start command in a dedicated class
-        handler.register("hexed", "Begin hosting with the Hexed gamemode.", args -> {
-            if (!Vars.state.is(State.menu)) {
-                Log.err("Stop the server first.");
-                return;
-            }
-
-            Vars.logic.reset();
-            this.hexed.getLogger().info("Generating map...");
-
-            // TODO Use the map generation API of Xpdustry/Router, the vanilla one is awful
-            final HexGenerator generator = new AnukenHexGenerator();
-            Vars.world.loadGenerator(generator.getWorldHeight(), generator.getWorldWidth(), tiles -> this.hexed
-                    .getHexedState()
-                    .setHexes(generator.generate(tiles)));
-
-            this.hexed.getLogger().info("Map generated.");
-
-            Vars.state.rules = this.createHexedRules();
-            Vars.logic.play();
-            Vars.netServer.openServer();
-        });
+    @TaskHandler(interval = 5L, unit = MindustryTimeUnit.MINUTES)
+    public void onLeaderboardDisplay() {
+        if (this.hexed.isActive()) {
+            Call.sendMessage(HexedUtils.createLeaderboard(this.hexed.getHexedState()));
+        }
     }
 
     @Override
@@ -176,11 +148,15 @@ public final class HexedLogic implements PluginListener {
 
                 if (oldController != newController && newController != null && newController != Team.derelict) {
                     final var player = Groups.player.find(p -> p.team() == newController);
-                    if (player == null) {
-                        this.hexed.getLogger().warn("Team {} has not player.", newController.name);
-                        continue;
+                    if (player != null) {
+                        DistributorProvider.get().getEventBus().post(new HexCaptureEvent(player, hex));
                     }
-                    DistributorProvider.get().getEventBus().post(new HexCaptureEvent(player, hex));
+                }
+                if (oldController != newController && oldController != null && oldController != Team.derelict) {
+                    final var player = Groups.player.find(p -> p.team() == oldController);
+                    if (player != null) {
+                        DistributorProvider.get().getEventBus().post(new HexLostEvent(player, hex));
+                    }
                 }
             }
         }
@@ -188,9 +164,8 @@ public final class HexedLogic implements PluginListener {
         if (this.interval.get(PLAYER_TIMER, 60)) {
             for (final var player : Groups.player) {
                 if (player.team() != Team.derelict && player.team().cores().isEmpty()) {
-                    player.team(Team.derelict);
-                    player.clearUnit();
-                    this.killTeam(player.team());
+                    final var oldTeam = player.team();
+                    DistributorProvider.get().getEventBus().post(new HexPlayerQuitEvent(player, oldTeam, false));
                 }
 
                 if (player.team() == Team.derelict) {
@@ -239,29 +214,40 @@ public final class HexedLogic implements PluginListener {
     }
 
     private void endGame() {
-        // TODO Verify if effective
-        var maxTeam = Team.derelict;
-        var max = 0;
-        for (final var team : Vars.state.teams.getActive()) {
-            if (team.team == Team.derelict) {
-                continue;
-            }
-            final var count =
-                    this.hexed.getHexedState().getControlled(team.team).size();
-            if (count > max) {
-                max = count;
-                maxTeam = team.team;
-            }
+        if (!this.hexed.isActive() || Vars.state.gameOver) {
+            return;
         }
-        DistributorProvider.get().getEventBus().post(new GameOverEvent(maxTeam));
+        final var winners = ArcCollections.immutableList(Vars.state.teams.getActive()).stream()
+                .map(data -> data.team)
+                .filter(team -> team != Team.derelict)
+                .collect(maxList(Comparator.comparing(
+                        team -> this.hexed.getHexedState().getControlled(team).size())));
+
+        if (winners.isEmpty()) {
+            DistributorProvider.get().getEventBus().post(new GameOverEvent(Team.derelict));
+            Call.infoMessage("No one won the game, too bad...");
+        } else if (winners.size() == 1) {
+            DistributorProvider.get().getEventBus().post(new GameOverEvent(winners.get(0)));
+            final var winner = Groups.player.find(p -> p.team() == winners.get(0));
+            if (winner != null) {
+                Call.infoMessage(winner.coloredName() + " [accent]won the game with [white] "
+                        + this.hexed
+                                .getHexedState()
+                                .getControlled(winners.get(0))
+                                .size() + " []hexes!");
+            }
+        } else {
+            DistributorProvider.get().getEventBus().post(new GameOverEvent(Team.derelict));
+            Call.infoMessage("The game ended in a draw!");
+        }
     }
 
     private void placeLoadout(final Player player, int x, int y) {
-        final var core = this.hexed.getLoadout().tiles.find(s -> s.block instanceof CoreBlock);
+        final var core = this.hexed.getHexedState().getLoadout().tiles.find(s -> s.block instanceof CoreBlock);
         final int cx = x - core.x;
         final int cy = y - core.y;
 
-        for (final var stile : this.hexed.getLoadout().tiles) {
+        for (final var stile : this.hexed.getHexedState().getLoadout().tiles) {
             final var tile = Vars.world.tile(stile.x + cx, stile.y + cy);
             if (tile == null) {
                 return;
@@ -282,5 +268,37 @@ public final class HexedLogic implements PluginListener {
                 }
             }
         }
+    }
+
+    // https://stackoverflow.com/a/29339106
+    static <T> Collector<T, ?, List<T>> maxList(Comparator<? super T> comp) {
+        return Collector.of(
+                ArrayList::new,
+                (list, t) -> {
+                    int c;
+                    if (list.isEmpty() || (c = comp.compare(t, list.get(0))) == 0) {
+                        list.add(t);
+                    } else if (c > 0) {
+                        list.clear();
+                        list.add(t);
+                    }
+                },
+                (list1, list2) -> {
+                    if (list1.isEmpty()) {
+                        return list2;
+                    }
+                    if (list2.isEmpty()) {
+                        return list1;
+                    }
+                    int r = comp.compare(list1.get(0), list2.get(0));
+                    if (r < 0) {
+                        return list2;
+                    } else if (r > 0) {
+                        return list1;
+                    } else {
+                        list1.addAll(list2);
+                        return list1;
+                    }
+                });
     }
 }

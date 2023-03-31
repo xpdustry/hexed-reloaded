@@ -22,27 +22,27 @@ import arc.math.Mathf;
 import arc.math.geom.Bresenham2;
 import arc.math.geom.Geometry;
 import arc.math.geom.Intersector;
+import arc.math.geom.Vec2;
 import arc.struct.Seq;
-import arc.struct.StringMap;
 import arc.util.Structs;
-import arc.util.Tmp;
 import arc.util.noise.Simplex;
 import fr.xpdustry.hexed.model.Hex;
 import fr.xpdustry.hexed.model.Hexagon;
+import fr.xpdustry.nucleus.mindustry.testing.map.MapGenerator;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import mindustry.Vars;
 import mindustry.content.Blocks;
-import mindustry.maps.Map;
+import mindustry.game.Team;
 import mindustry.maps.filters.GenerateFilter;
 import mindustry.maps.filters.GenerateFilter.GenerateInput;
 import mindustry.maps.filters.OreFilter;
 import mindustry.world.Block;
-import mindustry.world.Tile;
-import mindustry.world.Tiles;
 
-public final class AnukenHexGenerator implements HexGenerator {
+// Original code from Anuke
+public final class AnukeHexedGenerator implements MapGenerator<HexedGeneratorContext> {
+
+    private static final AnukeHexedGenerator INSTANCE = new AnukeHexedGenerator();
 
     private static final int DIAMETER = 74;
     private static final int SPACING = 78;
@@ -53,7 +53,7 @@ public final class AnukenHexGenerator implements HexGenerator {
     // temperature
     // |
     // v
-    private static final Block[][] floors = {
+    private static final Block[][] FLOORS = {
         {Blocks.sand, Blocks.sand, Blocks.sand, Blocks.sand, Blocks.sand, Blocks.grass},
         {Blocks.darksandWater, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.grass, Blocks.grass},
         {Blocks.darksandWater, Blocks.darksand, Blocks.darksand, Blocks.darksand, Blocks.grass, Blocks.shale},
@@ -68,7 +68,7 @@ public final class AnukenHexGenerator implements HexGenerator {
         {Blocks.ice, Blocks.iceSnow, Blocks.snow, Blocks.dacite, Blocks.hotrock, Blocks.salt}
     };
 
-    private static final Block[][] blocks = {
+    private static final Block[][] BLOCKS = {
         {Blocks.stoneWall, Blocks.stoneWall, Blocks.sandWall, Blocks.sandWall, Blocks.pine, Blocks.pine},
         {Blocks.stoneWall, Blocks.stoneWall, Blocks.duneWall, Blocks.duneWall, Blocks.pine, Blocks.pine},
         {Blocks.stoneWall, Blocks.stoneWall, Blocks.duneWall, Blocks.duneWall, Blocks.pine, Blocks.pine},
@@ -76,10 +76,26 @@ public final class AnukenHexGenerator implements HexGenerator {
         {Blocks.iceWall, Blocks.snowWall, Blocks.snowWall, Blocks.snowWall, Blocks.stoneWall, Blocks.saltWall}
     };
 
+    public static AnukeHexedGenerator getInstance() {
+        return INSTANCE;
+    }
+
+    private AnukeHexedGenerator() {}
+
     @Override
-    public List<Hex> generate(final Tiles tiles) {
+    public HexedGeneratorContext createContext() {
+        return new SimpleHexedGeneratorContext();
+    }
+
+    @Override
+    public void generate(final HexedGeneratorContext context) {
+        context.reset(516, 516);
+
         int seed1 = Mathf.random(0, 10000);
         int seed2 = Mathf.random(0, 10000);
+
+        // Generate ores
+
         Seq<GenerateFilter> ores = new Seq<>();
         Vars.maps.addDefaultOres(ores);
         ores.each(o -> ((OreFilter) o).threshold -= 0.05f);
@@ -91,22 +107,21 @@ public final class AnukenHexGenerator implements HexGenerator {
         });
         ores.each(GenerateFilter::randomize);
         GenerateInput in = new GenerateInput();
-        final List<Hex> hexes = getHex();
 
         for (int x = 0; x < WIDTH; x++) {
             for (int y = 0; y < HEIGHT; y++) {
                 int temp = Mathf.clamp(
-                        (int) ((Simplex.noise2d(seed1, 12, 0.6, 1.0 / 400, x, y) - 0.5) * 10 * blocks.length),
+                        (int) ((Simplex.noise2d(seed1, 12, 0.6, 1.0 / 400, x, y) - 0.5) * 10 * BLOCKS.length),
                         0,
-                        blocks.length - 1);
+                        BLOCKS.length - 1);
                 int elev = Mathf.clamp(
                         (int) (((Simplex.noise2d(seed2, 12, 0.6, 1.0 / 700, x, y) - 0.5) * 10 + 0.15f)
-                                * blocks[0].length),
+                                * BLOCKS[0].length),
                         0,
-                        blocks[0].length - 1);
+                        BLOCKS[0].length - 1);
 
-                Block floor = floors[temp][elev];
-                Block wall = blocks[temp][elev];
+                Block floor = FLOORS[temp][elev];
+                Block wall = BLOCKS[temp][elev];
                 Block ore = Blocks.air;
 
                 for (GenerateFilter f : ores) {
@@ -123,82 +138,12 @@ public final class AnukenHexGenerator implements HexGenerator {
                     }
                 }
 
-                tiles.set(x, y, new Tile(x, y, floor.id, ore.id, wall.id));
+                context.setTile(x, y, floor, ore, wall);
             }
         }
 
-        for (final var hex : hexes) {
-            int x = hex.getTileX();
-            int y = hex.getTileY();
-            Geometry.circle(x, y, WIDTH, HEIGHT, DIAMETER, (cx, cy) -> {
-                if (Intersector.isInsideHexagon(x, y, DIAMETER, cx, cy)) {
-                    Tile tile = tiles.getn(cx, cy);
-                    tile.setBlock(Blocks.air);
-                }
-            });
-            float angle = 360f / 3 / 2f - 90;
-            for (int a = 0; a < 3; a++) {
-                float f = a * 120f + angle;
+        // Generate hexes
 
-                Tmp.v1.trnsExact(f, SPACING + 12);
-                if (Structs.inBounds(x + (int) Tmp.v1.x, y + (int) Tmp.v1.y, WIDTH, HEIGHT)) {
-                    Tmp.v1.trnsExact(f, SPACING / 2f + 7);
-                    Bresenham2.line(
-                            x,
-                            y,
-                            x + (int) Tmp.v1.x,
-                            y + (int) Tmp.v1.y,
-                            (cx, cy) -> Geometry.circle(cx, cy, WIDTH, HEIGHT, 3, (c2x, c2y) -> tiles.getn(c2x, c2y)
-                                    .setBlock(Blocks.air)));
-                }
-            }
-        }
-
-        for (int x = 0; x < WIDTH; x++) {
-            for (int y = 0; y < HEIGHT; y++) {
-                Tile tile = tiles.getn(x, y);
-                Block wall = tile.block();
-                Block floor = tile.floor();
-
-                if (wall == Blocks.air) {
-                    if (Mathf.chance(0.03)) {
-                        if (floor == Blocks.sand) {
-                            wall = Blocks.sandBoulder;
-                        } else if (floor == Blocks.stone) {
-                            wall = Blocks.boulder;
-                        } else if (floor == Blocks.shale) {
-                            wall = Blocks.shaleBoulder;
-                        } else if (floor == Blocks.darksand) {
-                            wall = Blocks.boulder;
-                        } else if (floor == Blocks.moss) {
-                            wall = Blocks.sporeCluster;
-                        } else if (floor == Blocks.ice) {
-                            wall = Blocks.snowBoulder;
-                        } else if (floor == Blocks.snow) {
-                            wall = Blocks.snowBoulder;
-                        }
-                    }
-                }
-                tile.setBlock(wall);
-            }
-        }
-
-        Vars.state.map = new Map(StringMap.of("name", "Hex"));
-
-        return Collections.unmodifiableList(hexes);
-    }
-
-    @Override
-    public int getWorldWidth() {
-        return 516;
-    }
-
-    @Override
-    public int getWorldHeight() {
-        return 516;
-    }
-
-    public List<Hex> getHex() {
         final List<Hex> hexes = new ArrayList<>();
         final double h = Math.sqrt(3) * SPACING / 2;
         // base horizontal spacing=1.5w
@@ -210,6 +155,84 @@ public final class AnukenHexGenerator implements HexGenerator {
                 hexes.add(new Hexagon(y + (int) (x * (HEIGHT / (h / 2) - 2)), cx, cy, DIAMETER));
             }
         }
-        return hexes;
+        context.setHexes(hexes);
+
+        // Create hex boundaries
+
+        for (final var hex : hexes) {
+            int x = hex.getTileX();
+            int y = hex.getTileY();
+            Geometry.circle(x, y, WIDTH, HEIGHT, DIAMETER, (cx, cy) -> {
+                if (Intersector.isInsideHexagon(x, y, DIAMETER, cx, cy)) {
+                    context.setBlock(cx, cy, Blocks.air, Team.derelict);
+                }
+            });
+            float angle = 360f / 3 / 2f - 90;
+            for (int a = 0; a < 3; a++) {
+                float f = a * 120f + angle;
+
+                final var vector = new Vec2().trnsExact(f, SPACING + 12);
+                if (Structs.inBounds(x + (int) vector.x, y + (int) vector.y, WIDTH, HEIGHT)) {
+                    vector.trnsExact(f, SPACING / 2f + 7);
+                    Bresenham2.line(
+                            x,
+                            y,
+                            x + (int) vector.x,
+                            y + (int) vector.y,
+                            (cx, cy) -> Geometry.circle(
+                                    cx,
+                                    cy,
+                                    WIDTH,
+                                    HEIGHT,
+                                    3,
+                                    (c2x, c2y) -> context.setBlock(c2x, c2y, Blocks.air, Team.derelict)));
+                }
+            }
+        }
+
+        // Add some boulders :)
+
+        for (int x = 0; x < WIDTH; x++) {
+            for (int y = 0; y < HEIGHT; y++) {
+                if (Mathf.chance(0.03)) {
+                    context.setTileIf(
+                            x,
+                            y,
+                            tile -> tile.block() == Blocks.air && tile.floor() == Blocks.sand,
+                            Blocks.sandBoulder);
+                    context.setTileIf(
+                            x, y, tile -> tile.block() == Blocks.air && tile.floor() == Blocks.stone, Blocks.boulder);
+                    context.setTileIf(
+                            x,
+                            y,
+                            tile -> tile.block() == Blocks.air && tile.floor() == Blocks.shale,
+                            Blocks.shaleBoulder);
+                    context.setTileIf(
+                            x,
+                            y,
+                            tile -> tile.block() == Blocks.air && tile.floor() == Blocks.darksand,
+                            Blocks.boulder);
+                    context.setTileIf(
+                            x,
+                            y,
+                            tile -> tile.block() == Blocks.air && tile.floor() == Blocks.moss,
+                            Blocks.sporeCluster);
+                    context.setTileIf(
+                            x, y, tile -> tile.block() == Blocks.air && tile.floor() == Blocks.ice, Blocks.snowBoulder);
+                    context.setTileIf(
+                            x,
+                            y,
+                            tile -> tile.block() == Blocks.air && tile.floor() == Blocks.snow,
+                            Blocks.snowBoulder);
+                }
+            }
+        }
+
+        // Apply core radius rule
+
+        final var rules = context.getRules();
+        rules.polygonCoreProtection = false;
+        rules.enemyCoreBuildRadius = DIAMETER / 2F * Vars.tilesize;
+        context.setRules(rules);
     }
 }

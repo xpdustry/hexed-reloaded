@@ -26,12 +26,18 @@ import arc.util.Time;
 import fr.xpdustry.distributor.api.event.EventHandler;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
 import fr.xpdustry.hexed.event.HexCaptureEvent;
+import fr.xpdustry.hexed.event.HexLostEvent;
+import fr.xpdustry.hexed.event.HexPlayerQuitEvent;
 import fr.xpdustry.hexed.model.Hex;
 import java.util.ArrayList;
 import java.util.List;
+import mindustry.game.EventType;
+import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Iconc;
+import mindustry.gen.WorldLabel;
+import mindustry.graphics.Layer;
 
 public final class HexedRenderer implements PluginListener {
 
@@ -51,6 +57,35 @@ public final class HexedRenderer implements PluginListener {
                 Iconc.warning,
                 "Hex #" + event.hex().getIdentifier() + " captured by "
                         + event.player().name());
+    }
+
+    @EventHandler
+    public void onHexLost(final HexLostEvent event) {
+        event.player()
+                .sendMessage("[scarlet]You lost the hex #" + event.hex().getIdentifier() + " at ("
+                        + event.hex().getTileX() + ", " + event.hex().getTileY() + ")");
+    }
+
+    @EventHandler
+    public void onPlayerQuit(final HexPlayerQuitEvent event) {
+        if (!event.real()) {
+            Call.sendMessage(event.player().name() + " [white]died of cringe.");
+        }
+    }
+
+    @EventHandler
+    public void onPlayEvent(final EventType.PlayEvent event) {
+        if (this.hexed.isActive()) {
+            for (final var hex : this.hexed.getHexedState().getHexes()) {
+                final var label = WorldLabel.create();
+                label.set(hex.getX(), hex.getY());
+                label.text("#" + hex.getIdentifier());
+                label.flags(WorldLabel.flagOutline);
+                label.z(Layer.flyingUnitLow);
+                label.fontSize(3.5F);
+                label.add();
+            }
+        }
     }
 
     @Override
@@ -85,26 +120,27 @@ public final class HexedRenderer implements PluginListener {
                 }
             }
 
-            if (hex == null) {
+            if (hex == null || player.team() == Team.derelict) {
                 Call.hideHudText(player.con());
             } else {
                 final var builder = new StringBuilder();
-                builder.append("[white]Hex #").append(hex.getIdentifier()).append('\n');
+                builder.append("[white]Hex #").append(hex.getIdentifier());
                 final var team = this.hexed.getHexedState().getController(hex);
                 if (team != null) {
-                    builder.append("[#").append(team.color).append("]Controlled");
+                    builder.append("\n[#").append(team.color).append("]Controlled");
                     final var controller = Groups.player.find(p -> p.team() == team);
                     if (controller == null) {
-                        this.hexed.getLogger().warn("Team {} has not player.", team.name);
+                        // this.hexed.getLogger().warn("Team {} has no player.", team.name);
                         continue;
                     }
                     builder.append(" by ").append(controller.plainName());
-                } else if (this.hexed.getHexedState().getProgress(hex, player.team()) > 0) {
-                    builder.append("[lightgray]Capture progress: [accent]")
-                            .append((int) this.hexed.getHexedState().getProgress(hex, player.team()))
-                            .append("%");
                 } else {
-                    builder.append("[lightgray][[empty]");
+                    builder.append("\n[lightgray][[empty]");
+                }
+                if (team != player.team() && this.hexed.getHexedState().getProgress(hex, player.team()) > 0) {
+                    builder.append("\n[lightgray]Capture progress: [accent]")
+                            .append(Strings.fixed(this.hexed.getHexedState().getProgress(hex, player.team()), 1))
+                            .append("%");
                 }
 
                 Call.setHudText(player.con(), builder.toString());
@@ -113,22 +149,11 @@ public final class HexedRenderer implements PluginListener {
     }
 
     private void updateDuration() {
-        // TODO Spotless is being funky, cleanup, lol
-        Call.infoPopup(
-                "Time: "
-                        + Strings.formatMillis(Math.max(
-                                (HexedState.GAME_DURATION
-                                                - (long) (this.hexed
-                                                                .getHexedState()
-                                                                .getCounter()
-                                                        / 60L))
-                                        * 1000L,
-                                0L)),
-                1,
-                Align.bottom,
-                0,
-                0,
-                0,
-                0);
+        Call.infoPopup("Time: " + Strings.formatMillis(getRemainingTime()), 1, Align.bottom, 0, 0, 0, 0);
+    }
+
+    private long getRemainingTime() {
+        return Math.max(
+                (long) (((HexedState.GAME_DURATION - this.hexed.getHexedState().getCounter()) / 60F) * 1000L), 0L);
     }
 }

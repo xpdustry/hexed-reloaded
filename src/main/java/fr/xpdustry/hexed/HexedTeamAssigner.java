@@ -20,6 +20,9 @@ package fr.xpdustry.hexed;
 
 import arc.struct.Seq;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import mindustry.core.NetServer.TeamAssigner;
 import mindustry.game.Team;
 import mindustry.gen.Call;
@@ -27,15 +30,15 @@ import mindustry.gen.Player;
 
 public final class HexedTeamAssigner implements TeamAssigner {
 
-    private static final Team[] HEX_TEAMS =
-            Arrays.stream(Team.all).filter(t -> t.id > 6).toArray(Team[]::new);
-
+    private final List<Team> teams =
+            Arrays.stream(Team.all).filter(t -> t.id > 6).collect(Collectors.toList());
     private final HexedPluginReloaded hexed;
     private final TeamAssigner parent;
 
     public HexedTeamAssigner(final HexedPluginReloaded hexed, final TeamAssigner parent) {
         this.hexed = hexed;
         this.parent = parent;
+        Collections.shuffle(teams);
     }
 
     @Override
@@ -43,10 +46,11 @@ public final class HexedTeamAssigner implements TeamAssigner {
         final var used = Seq.with(players).map(Player::team).asSet();
 
         if (this.hexed.isActive()) {
-            for (final var team : HEX_TEAMS) {
+            for (final var team : teams) {
                 if (!team.active()
                         && !used.contains(team)
                         && !this.hexed.getHexedState().isDying(team)) {
+                    Collections.shuffle(teams);
                     return team;
                 }
             }

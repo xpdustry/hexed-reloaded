@@ -30,10 +30,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import mindustry.Vars;
+import mindustry.game.Schematic;
 import mindustry.game.Team;
 import mindustry.gen.Groups;
 import mindustry.world.blocks.storage.CoreBlock;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class HexedState {
@@ -50,6 +53,7 @@ public final class HexedState {
     private final IntMap<Timekeeper> spawnTimers = new IntMap<>();
     private final IntMap<IntFloatMap> progress = new IntMap<>();
     private float counter = 0f;
+    private @MonotonicNonNull Schematic loadout;
 
     public void setHexes(final List<Hex> hexes) {
         this.hexes.clear();
@@ -57,6 +61,7 @@ public final class HexedState {
         this.dying.clear();
         this.positions.clear();
         this.spawnTimers.clear();
+        this.progress.clear();
         this.hexes.addAll(hexes);
         for (final var hex : this.hexes) {
             this.positions.put(Point2.pack(hex.getTileX(), hex.getTileY()), hex);
@@ -115,19 +120,20 @@ public final class HexedState {
                 .reset();
     }
 
-    /*
-    public IntIntMap getLeaderboard() {
-        final var leaderboard = new IntIntMap();
-        for (final var hex : this.hexes) {
-            final var team = this.getController(hex);
-            if (team == null) {
-                continue;
-            }
-            leaderboard.increment(team.id, 1);
-        }
-        return leaderboard;
+    public Schematic getLoadout() {
+        return loadout;
     }
-     */
+
+    public void setLoadout(final Schematic loadout) {
+        this.loadout = loadout;
+    }
+
+    public Map<Team, Integer> getLeaderboard() {
+        return this.hexes.stream()
+                .map(this::getController)
+                .filter(team -> team != null && team != Team.derelict)
+                .collect(Collectors.toMap(team -> team, team -> 1, Integer::sum));
+    }
 
     public void updateProgress(final Hex hex) {
         final var center = Vars.world.tile(hex.getTileX(), hex.getTileY());
@@ -174,6 +180,15 @@ public final class HexedState {
     }
 
     public float getProgress(final Hex hex, final Team team) {
+        final var progress = getProgress0(hex, team);
+        final var controller = getController(hex);
+        if (controller != null && controller != team) {
+            return (progress / getProgress0(hex, controller)) * 100F;
+        }
+        return progress;
+    }
+
+    private float getProgress0(final Hex hex, final Team team) {
         return (this.progress
                                 .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new IntFloatMap(4))
                                 .get(team.id)

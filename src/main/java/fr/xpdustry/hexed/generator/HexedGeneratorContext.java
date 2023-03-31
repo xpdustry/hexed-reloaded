@@ -19,15 +19,30 @@
 package fr.xpdustry.hexed.generator;
 
 import fr.xpdustry.hexed.model.Hex;
+import fr.xpdustry.nucleus.mindustry.testing.map.MapContext;
 import java.util.List;
-import mindustry.world.Tiles;
+import java.util.function.Predicate;
+import mindustry.game.Rules;
+import mindustry.game.Schematic;
+import mindustry.world.Block;
+import mindustry.world.Tile;
 
-public interface HexGenerator {
+public interface HexedGeneratorContext extends MapContext {
 
-    // TODO Bring the map generation API of Xpdustry/Router
-    List<Hex> generate(final Tiles tiles);
+    void setTileIf(final int x, final int y, Predicate<Tile> condition, final Block block);
 
-    int getWorldWidth();
+    void setTile(final int x, final int y, final Block floor, final Block overlay, final Block wall);
 
-    int getWorldHeight();
+    void setRules(final Rules rules);
+
+    Rules getRules();
+
+    List<Hex> getHexes();
+
+    void setHexes(final List<Hex> hexes);
+
+    // TODO Returns a mutable schematic, create a proxy class to prevent this
+    Schematic getLoadout();
+
+    void setLoadout(final Schematic loadout);
 }
