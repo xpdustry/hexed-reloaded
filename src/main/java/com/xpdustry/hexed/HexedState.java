@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package fr.xpdustry.hexed;
+package com.xpdustry.hexed;
 
 import arc.math.geom.Point2;
 import arc.struct.IntFloatMap;
 import arc.struct.IntMap;
 import arc.util.Timekeeper;
-import fr.xpdustry.hexed.model.Hex;
+import com.xpdustry.hexed.model.Hex;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

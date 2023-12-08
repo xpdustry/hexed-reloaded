@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package fr.xpdustry.hexed.generator;
+package com.xpdustry.hexed.generator;
 
 import arc.math.Mathf;
 import arc.math.geom.Bresenham2;
@@ -26,8 +26,8 @@ import arc.math.geom.Vec2;
 import arc.struct.Seq;
 import arc.util.Structs;
 import arc.util.noise.Simplex;
-import fr.xpdustry.hexed.model.Hex;
-import fr.xpdustry.hexed.model.Hexagon;
+import com.xpdustry.hexed.model.Hex;
+import com.xpdustry.hexed.model.Hexagon;
 import fr.xpdustry.nucleus.mindustry.testing.map.MapGenerator;
 import java.util.ArrayList;
 import java.util.List;

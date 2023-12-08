@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package fr.xpdustry.hexed.commands;
+package com.xpdustry.hexed.commands;
 
 import cloud.commandframework.annotations.AnnotationParser;
 import fr.xpdustry.distributor.api.command.ArcCommandManager;

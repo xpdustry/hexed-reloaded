@@ -16,19 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package fr.xpdustry.hexed;
+package com.xpdustry.hexed;
 
 import arc.math.Mathf;
 import arc.util.Align;
 import arc.util.Interval;
 import arc.util.Strings;
 import arc.util.Time;
+import com.xpdustry.hexed.event.HexCaptureEvent;
+import com.xpdustry.hexed.event.HexLostEvent;
+import com.xpdustry.hexed.event.HexPlayerQuitEvent;
+import com.xpdustry.hexed.model.Hex;
 import fr.xpdustry.distributor.api.event.EventHandler;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
-import fr.xpdustry.hexed.event.HexCaptureEvent;
-import fr.xpdustry.hexed.event.HexLostEvent;
-import fr.xpdustry.hexed.event.HexPlayerQuitEvent;
-import fr.xpdustry.hexed.model.Hex;
 import java.util.ArrayList;
 import java.util.List;
 import mindustry.game.EventType;

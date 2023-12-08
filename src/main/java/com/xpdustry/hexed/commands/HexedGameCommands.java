@@ -16,21 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package fr.xpdustry.hexed.commands;
+package com.xpdustry.hexed.commands;
 
 import arc.util.CommandHandler;
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
+import com.xpdustry.hexed.HexedPluginReloaded;
+import com.xpdustry.hexed.HexedState;
+import com.xpdustry.hexed.HexedUtils;
+import com.xpdustry.hexed.event.HexPlayerJoinEvent;
+import com.xpdustry.hexed.event.HexPlayerQuitEvent;
 import fr.xpdustry.distributor.api.DistributorProvider;
 import fr.xpdustry.distributor.api.command.sender.CommandSender;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
-import fr.xpdustry.hexed.HexedPluginReloaded;
-import fr.xpdustry.hexed.HexedState;
-import fr.xpdustry.hexed.HexedUtils;
-import fr.xpdustry.hexed.event.HexPlayerJoinEvent;
-import fr.xpdustry.hexed.event.HexPlayerQuitEvent;
 import java.util.stream.Collectors;
 import mindustry.game.Team;
 import mindustry.gen.Player;

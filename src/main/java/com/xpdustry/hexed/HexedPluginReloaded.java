@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package fr.xpdustry.hexed;
+package com.xpdustry.hexed;
 
 import arc.util.CommandHandler;
+import com.xpdustry.hexed.commands.AnnotationCommandManager;
+import com.xpdustry.hexed.commands.HexedGameCommands;
+import com.xpdustry.hexed.commands.HexedStartCommand;
 import fr.xpdustry.distributor.api.plugin.AbstractMindustryPlugin;
-import fr.xpdustry.hexed.commands.AnnotationCommandManager;
-import fr.xpdustry.hexed.commands.HexedGameCommands;
-import fr.xpdustry.hexed.commands.HexedStartCommand;
 import mindustry.Vars;
 
 @SuppressWarnings("unused")

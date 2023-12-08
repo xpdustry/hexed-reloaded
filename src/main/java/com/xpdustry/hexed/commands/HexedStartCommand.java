@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package fr.xpdustry.hexed.commands;
+package com.xpdustry.hexed.commands;
 
 import arc.util.CommandHandler;
 import cloud.commandframework.annotations.Argument;
@@ -24,11 +24,11 @@ import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
 import cloud.commandframework.annotations.Flag;
+import com.xpdustry.hexed.HexedPluginReloaded;
+import com.xpdustry.hexed.generator.AnukeHexedGenerator;
+import com.xpdustry.hexed.generator.HexedGeneratorContext;
 import fr.xpdustry.distributor.api.command.sender.CommandSender;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
-import fr.xpdustry.hexed.HexedPluginReloaded;
-import fr.xpdustry.hexed.generator.AnukeHexedGenerator;
-import fr.xpdustry.hexed.generator.HexedGeneratorContext;
 import fr.xpdustry.nucleus.mindustry.testing.map.MapGenerator;
 import fr.xpdustry.nucleus.mindustry.testing.map.MapLoader;
 import java.io.IOException;

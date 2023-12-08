@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package fr.xpdustry.hexed.event;
+package com.xpdustry.hexed.event;
 
-import mindustry.game.Team;
+import com.xpdustry.hexed.model.Hex;
 import mindustry.gen.Player;
 
-public record HexPlayerQuitEvent(Player player, Team team, boolean real) {}
+public record HexCaptureEvent(Player player, Hex hex) {}

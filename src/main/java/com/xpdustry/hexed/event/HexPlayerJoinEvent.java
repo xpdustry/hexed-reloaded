@@ -16,9 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package fr.xpdustry.hexed.event;
+package com.xpdustry.hexed.event;
 
-import fr.xpdustry.hexed.model.Hex;
 import mindustry.gen.Player;
 
-public record HexLostEvent(Player player, Hex hex) {}
+public record HexPlayerJoinEvent(Player player, boolean real) {}

@@ -16,21 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package fr.xpdustry.hexed;
+package com.xpdustry.hexed;
 
 import arc.math.Mathf;
 import arc.util.Interval;
 import arc.util.Time;
+import com.xpdustry.hexed.event.HexCaptureEvent;
+import com.xpdustry.hexed.event.HexLostEvent;
+import com.xpdustry.hexed.event.HexPlayerJoinEvent;
+import com.xpdustry.hexed.event.HexPlayerQuitEvent;
 import fr.xpdustry.distributor.api.DistributorProvider;
 import fr.xpdustry.distributor.api.event.EventHandler;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
 import fr.xpdustry.distributor.api.scheduler.MindustryTimeUnit;
 import fr.xpdustry.distributor.api.scheduler.TaskHandler;
 import fr.xpdustry.distributor.api.util.ArcCollections;
-import fr.xpdustry.hexed.event.HexCaptureEvent;
-import fr.xpdustry.hexed.event.HexLostEvent;
-import fr.xpdustry.hexed.event.HexPlayerJoinEvent;
-import fr.xpdustry.hexed.event.HexPlayerQuitEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;

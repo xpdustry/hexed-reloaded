@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package fr.xpdustry.hexed.generator;
+package com.xpdustry.hexed.generator;
 
-import fr.xpdustry.hexed.HexedPluginReloaded;
-import fr.xpdustry.hexed.model.Hex;
+import com.xpdustry.hexed.HexedPluginReloaded;
+import com.xpdustry.hexed.model.Hex;
 import fr.xpdustry.nucleus.mindustry.testing.map.SimpleMapContext;
 import java.io.IOException;
 import java.util.ArrayList;
