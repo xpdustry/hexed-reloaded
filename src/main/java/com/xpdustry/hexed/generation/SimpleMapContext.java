@@ -25,6 +25,7 @@ public class SimpleMapContext implements MapContext {
     private int width = 1;
     private int height = 1;
     private MapTile[][] tiles = {{new MapTile()}};
+    private String name = "Unknown";
     private Rules rules = new Rules();
 
     @Override
@@ -59,6 +60,26 @@ public class SimpleMapContext implements MapContext {
     }
 
     @Override
+    public Rules getRules() {
+        return this.rules.copy();
+    }
+
+    @Override
+    public void setRules(final Rules rules) {
+        this.rules = rules.copy();
+    }
+
+    @Override
+    public String getMapName() {
+        return this.name;
+    }
+
+    @Override
+    public void setMapName(final String name) {
+        this.name = name;
+    }
+
+    @Override
     public void forEachTile(final TileConsumer action) {
         for (int y = 0; y < this.tiles.length; y++) {
             for (int x = 0; x < this.tiles[y].length; x++) {
@@ -68,12 +89,11 @@ public class SimpleMapContext implements MapContext {
     }
 
     @Override
-    public Rules getRules() {
-        return this.rules.copy();
-    }
-
-    @Override
-    public void setRules(final Rules rules) {
-        this.rules = rules.copy();
+    public void forEachTile(final int x, final int y, final int w, final int h, final TileConsumer action) {
+        for (int ry = y; ry < y + h; ry++) {
+            for (int rx = x; rx < x + w; rx++) {
+                action.accept(rx, ry, this.tiles[ry][rx]);
+            }
+        }
     }
 }

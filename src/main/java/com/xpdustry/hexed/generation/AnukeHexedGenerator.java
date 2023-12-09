@@ -29,7 +29,6 @@ import com.xpdustry.hexed.model.Hex;
 import com.xpdustry.hexed.model.Hexagon;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.world.Block;
@@ -89,22 +88,7 @@ public final class AnukeHexedGenerator implements MapGenerator<HexedMapContext> 
         final int seed1 = Mathf.random(0, 10000);
         final int seed2 = Mathf.random(0, 10000);
 
-        // Generate ores
-
-        final var ores = OreGeneratorFunction.getDefaultOreFunctions();
-        for (final var function : ores) {
-            function.setThreshold(function.getThreshold() - 0.05F);
-        }
-
-        {
-            final var function = new OreGeneratorFunction();
-            function.setOre(Blocks.oreScrap);
-            function.setScale(function.getScale() + 2 / 2.1F);
-            ores.add(0, function);
-        }
-
-        final var random = new Random();
-        ores.forEach(function -> function.setSeed(random.nextInt()));
+        // Generate the base floor
 
         context.forEachTile((x, y, tile) -> {
             final int temp = Mathf.clamp(
@@ -120,9 +104,11 @@ public final class AnukeHexedGenerator implements MapGenerator<HexedMapContext> 
             tile.setBlock(BLOCKS[temp][elev]);
         });
 
-        for (final var function : ores) {
-            context.forEachTile(function);
-        }
+        // Generate ores
+
+        final var ores = OreGeneratorFunction.getDefaultHexedOreFunctions();
+        ores.forEach(GeneratorFunction::randomize);
+        context.forEachTile(TileConsumer.aggregate(ores));
 
         // Generate hexes
 
@@ -197,6 +183,7 @@ public final class AnukeHexedGenerator implements MapGenerator<HexedMapContext> 
         rules.polygonCoreProtection = false;
         rules.enemyCoreBuildRadius = DIAMETER / 2F * Vars.tilesize;
         context.setRules(rules);
+        context.setMapName("Hexed");
         return context;
     }
 }

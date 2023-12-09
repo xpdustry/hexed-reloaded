@@ -18,27 +18,22 @@
  */
 package com.xpdustry.hexed.generation;
 
-import mindustry.game.Rules;
+import java.util.Random;
 
-public interface MapContext {
+public abstract class GeneratorFunction implements TileConsumer {
 
-    void resize(final int width, final int height);
+    private static final Random RANDOM = new Random();
+    private int seed = 0;
 
-    int getWidth();
+    public int getSeed() {
+        return this.seed;
+    }
 
-    int getHeight();
+    public void setSeed(final int seed) {
+        this.seed = seed;
+    }
 
-    MapTile getTile(int x, int y);
-
-    Rules getRules();
-
-    void setRules(final Rules rules);
-
-    String getMapName();
-
-    void setMapName(final String name);
-
-    void forEachTile(final TileConsumer action);
-
-    void forEachTile(int x, int y, int w, int h, final TileConsumer action);
+    public void randomize() {
+        this.seed = RANDOM.nextInt(1_000_000_000);
+    }
 }

@@ -27,9 +27,8 @@ import mindustry.world.blocks.environment.OreBlock;
 
 import static mindustry.Vars.content;
 
-public final class OreGeneratorFunction implements MapContext.TileConsumer {
+public final class OreGeneratorFunction extends GeneratorFunction {
 
-    private int seed = 1;
     private float scale = 23;
     private float threshold = 0.81f;
     private float octaves = 2f;
@@ -52,12 +51,18 @@ public final class OreGeneratorFunction implements MapContext.TileConsumer {
         return functions;
     }
 
-    public int getSeed() {
-        return this.seed;
-    }
+    public static List<OreGeneratorFunction> getDefaultHexedOreFunctions() {
+        final var functions = getDefaultOreFunctions();
+        for (final var function : functions) {
+            function.setThreshold(function.getThreshold() - 0.05F);
+        }
 
-    public void setSeed(final int seed) {
-        this.seed = seed;
+        final var scrap = new OreGeneratorFunction();
+        scrap.setOre(Blocks.oreScrap);
+        scrap.setScale(scrap.getScale() + 2 / 2.1F);
+        functions.add(0, scrap);
+
+        return functions;
     }
 
     public float getScale() {
@@ -119,7 +124,7 @@ public final class OreGeneratorFunction implements MapContext.TileConsumer {
     @Override
     public void accept(final int x, final int y, final MapTile tile) {
         final float noise = Simplex.noise2d(
-                this.seed, this.octaves, this.falloff, 1f / this.scale, (float) x + 10, y + x * this.tilt + 10);
+                this.getSeed(), this.octaves, this.falloff, 1f / this.scale, (float) x + 10, y + x * this.tilt + 10);
         if (noise > this.threshold
                 && tile.getOverlay() != Blocks.spawn
                 && (this.target == Blocks.air || tile.getFloor() == this.target || tile.getOverlay() == this.target)

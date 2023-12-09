@@ -91,6 +91,7 @@ public final class MapLoader implements Closeable {
 
         Vars.world.endMapLoad();
         Vars.state.rules = context.getRules();
+        Vars.state.map.tags.put("name", context.getMapName());
         return context;
     }
 
