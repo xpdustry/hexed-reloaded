@@ -26,6 +26,7 @@ import com.xpdustry.hexed.api.generation.HexedMapContext;
 import com.xpdustry.hexed.api.generation.ImmutableSchematic;
 import com.xpdustry.hexed.api.generation.MapGenerator;
 import com.xpdustry.hexed.api.generation.MapLoader;
+import com.xpdustry.hexed.api.generation.RouterFestHexedGenerator;
 import com.xpdustry.hexed.api.generation.SimpleHexedMapContext;
 import fr.xpdustry.distributor.api.plugin.AbstractMindustryPlugin;
 import java.io.IOException;
@@ -114,6 +115,7 @@ public final class HexedPluginReloaded extends AbstractMindustryPlugin implement
         }
 
         this.generators.put("anuke", new AnukeHexedGenerator());
+        this.generators.put("router-fest", new RouterFestHexedGenerator());
         this.state = new SimpleHexedState(this.defaultBase, Collections.emptyList());
 
         this.addListener(new HexedLogic(this));

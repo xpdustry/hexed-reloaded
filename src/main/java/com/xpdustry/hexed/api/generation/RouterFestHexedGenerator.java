@@ -16,23 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.generation;
+package com.xpdustry.hexed.api.generation;
 
-import com.xpdustry.hexed.model.Hex;
-import com.xpdustry.hexed.model.SquareHex;
+import com.xpdustry.hexed.api.model.Hex;
+import com.xpdustry.hexed.api.model.Square;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import mindustry.Vars;
 import mindustry.content.Blocks;
-import mindustry.game.Schematic;
 import mindustry.game.Schematics;
 import mindustry.world.blocks.environment.Floor;
 
-public final class RouterFestHexedGenerator implements MapGenerator<HexedMapContext> {
-
-    private static final RouterFestHexedGenerator INSTANCE = new RouterFestHexedGenerator();
+public class RouterFestHexedGenerator implements MapGenerator<HexedMapContext> {
 
     private static final int HEX_MAP_SIZE = 8;
     private static final int HEX_SIZE = 49;
@@ -47,12 +44,6 @@ public final class RouterFestHexedGenerator implements MapGenerator<HexedMapCont
 
     private static final Floor HEX_BORDER_FLOOR = Blocks.darkPanel1.asFloor();
     private static final Floor HEX_FLOOR = Blocks.darksand.asFloor();
-
-    public static RouterFestHexedGenerator getInstance() {
-        return INSTANCE;
-    }
-
-    private RouterFestHexedGenerator() {}
 
     @Override
     public HexedMapContext generate() {
@@ -73,7 +64,7 @@ public final class RouterFestHexedGenerator implements MapGenerator<HexedMapCont
                 final var cx = x + (HEX_TOTAL_SIZE / 2);
                 final var cy = y + (HEX_TOTAL_SIZE / 2);
 
-                hexes.add(new SquareHex(j + (i * HEX_MAP_SIZE), cx, cy, HEX_DIAMETER));
+                hexes.add(new Square(j + (i * HEX_MAP_SIZE), cx, cy, HEX_DIAMETER));
 
                 context.forEachTile(x, y, HEX_TOTAL_SIZE, HEX_TOTAL_SIZE, (tx, ty, tile) -> {
                     tile.setBlock(Blocks.air);
@@ -151,9 +142,9 @@ public final class RouterFestHexedGenerator implements MapGenerator<HexedMapCont
         return context;
     }
 
-    private Schematic getRouterBase() {
+    private ImmutableSchematic getRouterBase() {
         try (final var stream = this.getClass().getResourceAsStream("/router.msch")) {
-            return Schematics.read(Objects.requireNonNull(stream));
+            return new ImmutableSchematic(Schematics.read(Objects.requireNonNull(stream)));
         } catch (final IOException e) {
             throw new RuntimeException("Failed to load the router base schematic.", e);
         }
