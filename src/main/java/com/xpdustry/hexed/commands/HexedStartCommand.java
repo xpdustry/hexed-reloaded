@@ -28,6 +28,7 @@ import com.xpdustry.hexed.generation.AnukeHexedGenerator;
 import com.xpdustry.hexed.generation.HexedMapContext;
 import com.xpdustry.hexed.generation.MapGenerator;
 import com.xpdustry.hexed.generation.MapLoader;
+import com.xpdustry.hexed.generation.RouterFestHexedGenerator;
 import fr.xpdustry.distributor.api.command.sender.CommandSender;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
 import java.io.IOException;
@@ -41,8 +42,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class HexedStartCommand implements PluginListener {
 
-    private static final Map<String, MapGenerator<HexedMapContext>> GENERATORS =
-            Map.of("anuke", AnukeHexedGenerator.getInstance());
+    private static final Map<String, MapGenerator<HexedMapContext>> GENERATORS = Map.of(
+            "anuke", AnukeHexedGenerator.getInstance(),
+            "routerfest", RouterFestHexedGenerator.getInstance());
 
     private final HexedPluginReloaded hexed;
     private final Path customBasesDirectory;
