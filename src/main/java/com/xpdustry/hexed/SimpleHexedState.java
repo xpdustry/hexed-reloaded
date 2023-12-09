@@ -22,81 +22,89 @@ import arc.math.geom.Point2;
 import arc.struct.IntFloatMap;
 import arc.struct.IntMap;
 import arc.util.Timekeeper;
-import com.xpdustry.hexed.model.Hex;
-import java.util.ArrayList;
-import java.util.Collections;
+import com.xpdustry.hexed.api.HexedState;
+import com.xpdustry.hexed.api.generation.ImmutableSchematic;
+import com.xpdustry.hexed.api.model.Hex;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import mindustry.Vars;
-import mindustry.game.Schematic;
 import mindustry.game.Team;
 import mindustry.gen.Groups;
 import mindustry.world.blocks.storage.CoreBlock;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class HexedState {
+final class SimpleHexedState implements HexedState {
 
     // Item requirement to capture a hex
     private static final int ITEM_REQUIREMENT = 210;
 
-    public static final int GAME_DURATION = 60 * 60 * 90;
-
     private final Map<Hex, Team> controllers = new HashMap<>();
-    private final List<Hex> hexes = new ArrayList<>();
+    private final List<Hex> hexes;
     private final Set<Team> dying = new HashSet<>();
     private final IntMap<Hex> positions = new IntMap<>();
     private final IntMap<Timekeeper> spawnTimers = new IntMap<>();
     private final IntMap<IntFloatMap> progress = new IntMap<>();
     private float counter = 0f;
-    private Schematic base = HexedPluginReloaded.getDefaultBaseSchematic();
+    private final ImmutableSchematic base;
 
-    public void setHexes(final List<Hex> hexes) {
-        this.hexes.clear();
-        this.controllers.clear();
-        this.dying.clear();
-        this.positions.clear();
-        this.spawnTimers.clear();
-        this.progress.clear();
-        this.hexes.addAll(hexes);
+    SimpleHexedState(final ImmutableSchematic base, final List<Hex> hexes) {
+        this.base = base;
+        this.hexes = List.copyOf(hexes);
         for (final var hex : this.hexes) {
             this.positions.put(Point2.pack(hex.getTileX(), hex.getTileY()), hex);
         }
     }
 
-    public void setCounter(final float counter) {
+    @Override
+    public void setTime(final float counter) {
         this.counter = counter;
     }
 
-    public float getCounter() {
+    @Override
+    public float getTime() {
         return this.counter;
     }
 
-    public void incrementCounter(final float delta) {
-        this.counter += delta;
-    }
-
+    @Override
     public List<Hex> getHexes() {
-        return Collections.unmodifiableList(this.hexes);
+        return this.hexes;
     }
 
+    @Override
     public List<Hex> getControlled(final Team team) {
         return this.hexes.stream()
                 .filter(hex -> this.getController(hex) == team)
                 .toList();
     }
 
+    @Override
     public @Nullable Team getController(final Hex hex) {
         return this.controllers.get(hex);
     }
 
+    @Override
     public @Nullable Hex getHex(final int x, final int y) {
         return this.positions.get(Point2.pack(x, y));
     }
 
+    @Override
+    public boolean isAvailable(final Hex hex) {
+        return (this.getController(hex) == null)
+                && this.spawnTimers
+                        .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new Timekeeper(6 * 60))
+                        .get();
+    }
+
+    public void resetSpawnTimer(final Hex hex) {
+        this.spawnTimers
+                .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new Timekeeper(6 * 60))
+                .reset();
+    }
+
+    @Override
     public boolean isDying(final Team team) {
         return this.dying.contains(team);
     }
@@ -109,31 +117,27 @@ public final class HexedState {
         }
     }
 
-    public boolean canSpawn(final Hex hex) {
-        return this.spawnTimers
-                .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new Timekeeper(6 * 60))
-                .get();
-    }
-
-    public void resetSpawnTimer(final Hex hex) {
-        this.spawnTimers
-                .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new Timekeeper(6 * 60))
-                .reset();
-    }
-
-    public Schematic getBaseSchematic() {
+    @Override
+    public ImmutableSchematic getBaseSchematic() {
         return this.base;
     }
 
-    public void setBaseSchematic(final Schematic base) {
-        this.base = base;
+    @Override
+    public float getProgress(final Hex hex, final Team team) {
+        final var progress = this.getProgress0(hex, team);
+        final var controller = this.getController(hex);
+        if (controller != null && controller != team) {
+            return (progress / this.getProgress0(hex, controller)) * 100F;
+        }
+        return progress;
     }
 
-    public Map<Team, Integer> getLeaderboard() {
-        return this.hexes.stream()
-                .map(this::getController)
-                .filter(team -> team != null && team != Team.derelict)
-                .collect(Collectors.toMap(team -> team, team -> 1, Integer::sum));
+    private float getProgress0(final Hex hex, final Team team) {
+        return (this.progress
+                                .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new IntFloatMap(4))
+                                .get(team.id)
+                        / ITEM_REQUIREMENT)
+                * 100F;
     }
 
     public void updateProgress(final Hex hex) {
@@ -178,22 +182,5 @@ public final class HexedState {
         }
 
         this.controllers.put(hex, null);
-    }
-
-    public float getProgress(final Hex hex, final Team team) {
-        final var progress = this.getProgress0(hex, team);
-        final var controller = this.getController(hex);
-        if (controller != null && controller != team) {
-            return (progress / this.getProgress0(hex, controller)) * 100F;
-        }
-        return progress;
-    }
-
-    private float getProgress0(final Hex hex, final Team team) {
-        return (this.progress
-                                .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new IntFloatMap(4))
-                                .get(team.id)
-                        / ITEM_REQUIREMENT)
-                * 100F;
     }
 }

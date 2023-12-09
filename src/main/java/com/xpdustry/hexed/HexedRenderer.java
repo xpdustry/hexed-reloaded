@@ -23,10 +23,10 @@ import arc.util.Align;
 import arc.util.Interval;
 import arc.util.Strings;
 import arc.util.Time;
-import com.xpdustry.hexed.event.HexCaptureEvent;
-import com.xpdustry.hexed.event.HexLostEvent;
-import com.xpdustry.hexed.event.HexPlayerQuitEvent;
-import com.xpdustry.hexed.model.Hex;
+import com.xpdustry.hexed.api.event.HexCaptureEvent;
+import com.xpdustry.hexed.api.event.HexLostEvent;
+import com.xpdustry.hexed.api.event.HexPlayerQuitEvent;
+import com.xpdustry.hexed.api.model.Hex;
 import fr.xpdustry.distributor.api.event.EventHandler;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
 import java.util.ArrayList;
@@ -78,7 +78,7 @@ public final class HexedRenderer implements PluginListener {
 
     @EventHandler
     public void onPlayEvent(final EventType.StateChangeEvent event) {
-        if (this.hexed.isActive() && event.to == GameState.State.playing) {
+        if (this.hexed.isEnabled() && event.to == GameState.State.playing) {
             for (final var hex : this.hexed.getHexedState().getHexes()) {
                 final var label = WorldLabel.create();
                 label.set(hex.getX(), hex.getY() + (Vars.tilesize / 2F));
@@ -93,7 +93,7 @@ public final class HexedRenderer implements PluginListener {
 
     @Override
     public void onPluginUpdate() {
-        if (!this.hexed.isActive()) {
+        if (!this.hexed.isEnabled()) {
             return;
         }
 
@@ -157,6 +157,6 @@ public final class HexedRenderer implements PluginListener {
 
     private long getRemainingTime() {
         return Math.max(
-                (long) (((HexedState.GAME_DURATION - this.hexed.getHexedState().getCounter()) / 60F) * 1000L), 0L);
+                (long) (((this.hexed.getDuration() - this.hexed.getHexedState().getTime()) / 60F) * 1000L), 0L);
     }
 }

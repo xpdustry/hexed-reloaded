@@ -28,7 +28,7 @@ import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Player;
 
-public final class HexedTeamAssigner implements TeamAssigner {
+final class HexedTeamAssigner implements TeamAssigner {
 
     private final HexedPluginReloaded hexed;
     private final TeamAssigner parent;
@@ -49,7 +49,7 @@ public final class HexedTeamAssigner implements TeamAssigner {
     public Team assign(final Player player, final Iterable<Player> players) {
         final var used = Seq.with(players).map(Player::team).asSet();
 
-        if (this.hexed.isActive()) {
+        if (this.hexed.isEnabled()) {
             for (final var team : this.teams) {
                 if (!team.active()
                         && !used.contains(team)

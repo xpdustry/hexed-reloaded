@@ -21,10 +21,10 @@ package com.xpdustry.hexed;
 import arc.math.Mathf;
 import arc.util.Interval;
 import arc.util.Time;
-import com.xpdustry.hexed.event.HexCaptureEvent;
-import com.xpdustry.hexed.event.HexLostEvent;
-import com.xpdustry.hexed.event.HexPlayerJoinEvent;
-import com.xpdustry.hexed.event.HexPlayerQuitEvent;
+import com.xpdustry.hexed.api.event.HexCaptureEvent;
+import com.xpdustry.hexed.api.event.HexLostEvent;
+import com.xpdustry.hexed.api.event.HexPlayerJoinEvent;
+import com.xpdustry.hexed.api.event.HexPlayerQuitEvent;
 import fr.xpdustry.distributor.api.DistributorProvider;
 import fr.xpdustry.distributor.api.event.EventHandler;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
@@ -69,7 +69,7 @@ public final class HexedLogic implements PluginListener {
 
     @EventHandler
     public void onPlayerJoin(final HexPlayerJoinEvent event) {
-        if (!this.hexed.isActive()) {
+        if (!this.hexed.isEnabled()) {
             return;
         }
         if (!event.real()) {
@@ -81,7 +81,7 @@ public final class HexedLogic implements PluginListener {
 
         final var hexes = this.hexed.getHexedState().getHexes().stream()
                 .filter(hex -> this.hexed.getHexedState().getController(hex) == null
-                        && this.hexed.getHexedState().canSpawn(hex))
+                        && this.hexed.getHexedState().isAvailable(hex))
                 .toList();
 
         if (hexes.isEmpty()) {
@@ -93,7 +93,7 @@ public final class HexedLogic implements PluginListener {
         } else {
             final var hex = hexes.get(Mathf.random(0, hexes.size() - 1));
             this.placeBaseSchematic(event.player(), hex.getTileX(), hex.getTileY());
-            this.hexed.getHexedState().updateProgress(hex);
+            this.hexed.getHexedState0().updateProgress(hex);
         }
     }
 
@@ -104,7 +104,7 @@ public final class HexedLogic implements PluginListener {
 
     @EventHandler
     public void onPlayerQuit(final HexPlayerQuitEvent event) {
-        if (this.hexed.isActive()) {
+        if (this.hexed.isEnabled()) {
             this.killTeam(event.player().team());
             event.player().unit().kill();
             event.player().team(Team.derelict);
@@ -115,35 +115,35 @@ public final class HexedLogic implements PluginListener {
     @EventHandler
     public void onBlockDestroy(final EventType.BlockDestroyEvent event) {
         // reset last spawn times so this hex becomes vacant for a while.
-        if (this.hexed.isActive() && event.tile.block() instanceof CoreBlock) {
+        if (this.hexed.isEnabled() && event.tile.block() instanceof CoreBlock) {
             final var hex = this.hexed.getHexedState().getHex(event.tile.x, event.tile.y);
             if (hex != null) {
-                this.hexed.getHexedState().resetSpawnTimer(hex);
-                this.hexed.getHexedState().updateProgress(hex);
+                this.hexed.getHexedState0().resetSpawnTimer(hex);
+                this.hexed.getHexedState0().updateProgress(hex);
             }
         }
     }
 
     @TaskHandler(interval = 5L, unit = MindustryTimeUnit.MINUTES)
     public void onLeaderboardDisplay() {
-        if (this.hexed.isActive()) {
+        if (this.hexed.isEnabled() && Vars.state.isGame()) {
             Call.sendMessage(HexedUtils.createLeaderboard(this.hexed.getHexedState()));
         }
     }
 
     @Override
     public void onPluginUpdate() {
-        if (!this.hexed.isActive()) {
-            this.hexed.getHexedState().setCounter(0);
+        if (!this.hexed.isEnabled()) {
+            this.hexed.getHexedState().setTime(0);
             return;
         } else {
-            this.hexed.getHexedState().incrementCounter(Time.delta);
+            this.hexed.getHexedState().setTime(this.hexed.getHexedState().getTime() + Time.delta);
         }
 
         if (this.interval.get(CONTROLLER_TIMER, 2 * 60)) {
             for (final var hex : this.hexed.getHexedState().getHexes()) {
                 final var oldController = this.hexed.getHexedState().getController(hex);
-                this.hexed.getHexedState().updateProgress(hex);
+                this.hexed.getHexedState0().updateProgress(hex);
                 final var newController = this.hexed.getHexedState().getController(hex);
 
                 if (oldController != newController && newController != null && newController != Team.derelict) {
@@ -152,6 +152,7 @@ public final class HexedLogic implements PluginListener {
                         DistributorProvider.get().getEventBus().post(new HexCaptureEvent(player, hex));
                     }
                 }
+
                 if (oldController != newController && oldController != null && oldController != Team.derelict) {
                     final var player = Groups.player.find(p -> p.team() == oldController);
                     if (player != null) {
@@ -180,23 +181,23 @@ public final class HexedLogic implements PluginListener {
             }
         }
 
-        if (this.hexed.getHexedState().getCounter() > HexedState.GAME_DURATION) {
+        if (this.hexed.getHexedState().getTime() > this.hexed.getDuration()) {
             this.endGame();
         }
     }
 
     private void killTeam(final Team team) {
-        this.hexed.getHexedState().setDying(team, true);
+        this.hexed.getHexedState0().setDying(team, true);
         team.data().destroyToDerelict();
         DistributorProvider.get()
                 .getPluginScheduler()
                 .scheduleAsync(this.hexed)
                 .delay(8, MindustryTimeUnit.SECONDS)
-                .execute(() -> this.hexed.getHexedState().setDying(team, false));
+                .execute(() -> this.hexed.getHexedState0().setDying(team, false));
     }
 
     private void endGame() {
-        if (!this.hexed.isActive() || Vars.state.gameOver) {
+        if (!this.hexed.isEnabled() || Vars.state.gameOver) {
             return;
         }
         final var winners = ArcCollections.immutableList(Vars.state.teams.getActive()).stream()
@@ -225,12 +226,15 @@ public final class HexedLogic implements PluginListener {
     }
 
     private void placeBaseSchematic(final Player player, final int x, final int y) {
-        final var core = this.hexed.getHexedState().getBaseSchematic().tiles.find(s -> s.block instanceof CoreBlock);
-        final int cx = x - core.x;
-        final int cy = y - core.y;
+        final var core = this.hexed.getHexedState().getBaseSchematic().getTiles().stream()
+                .filter(s -> s.block() instanceof CoreBlock)
+                .findFirst()
+                .orElseThrow();
+        final int cx = x - core.x();
+        final int cy = y - core.y();
 
-        for (final var stile : this.hexed.getHexedState().getBaseSchematic().tiles) {
-            final var tile = Vars.world.tile(stile.x + cx, stile.y + cy);
+        for (final var stile : this.hexed.getHexedState().getBaseSchematic().getTiles()) {
+            final var tile = Vars.world.tile(stile.x() + cx, stile.y() + cy);
             if (tile == null) {
                 return;
             }
@@ -239,10 +243,10 @@ public final class HexedLogic implements PluginListener {
                 tile.removeNet();
             }
 
-            tile.setNet(stile.block, player.team(), stile.rotation);
+            tile.setNet(stile.block(), player.team(), stile.rotation().ordinal());
 
-            if (stile.config != null) {
-                tile.build.configureAny(stile.config);
+            if (stile.configuration() != null) {
+                tile.build.configureAny(stile.configuration());
             }
             if (tile.block() instanceof CoreBlock) {
                 for (final var stack : Vars.state.rules.loadout) {

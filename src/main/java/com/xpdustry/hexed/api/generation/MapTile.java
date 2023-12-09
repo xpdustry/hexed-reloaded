@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.generation;
+package com.xpdustry.hexed.api.generation;
 
 import mindustry.content.Blocks;
 import mindustry.game.Team;

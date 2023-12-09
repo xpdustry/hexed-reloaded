@@ -18,11 +18,12 @@
  */
 package com.xpdustry.hexed;
 
+import com.xpdustry.hexed.api.HexedState;
 import java.util.Optional;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 
-public final class HexedUtils {
+final class HexedUtils {
 
     private HexedUtils() {}
 

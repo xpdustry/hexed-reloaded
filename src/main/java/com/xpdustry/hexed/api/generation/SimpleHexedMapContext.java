@@ -16,21 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.generation;
+package com.xpdustry.hexed.api.generation;
 
 import com.xpdustry.hexed.HexedPluginReloaded;
-import com.xpdustry.hexed.model.Hex;
+import com.xpdustry.hexed.api.model.Hex;
 import java.util.Collections;
 import java.util.List;
 import mindustry.content.Items;
 import mindustry.game.Gamemode;
-import mindustry.game.Schematic;
 import mindustry.type.ItemStack;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SimpleHexedMapContext extends SimpleMapContext implements HexedMapContext {
 
     private List<Hex> hexes = Collections.emptyList();
-    private Schematic schematic = HexedPluginReloaded.getDefaultBaseSchematic();
+    private @Nullable ImmutableSchematic schematic = null;
 
     {
         final var rules = this.getRules();
@@ -71,12 +71,12 @@ public class SimpleHexedMapContext extends SimpleMapContext implements HexedMapC
     }
 
     @Override
-    public Schematic getBaseSchematic() {
+    public @Nullable ImmutableSchematic getBaseSchematic() {
         return this.schematic;
     }
 
     @Override
-    public void setBaseSchematic(final Schematic schematic) {
+    public void setBaseSchematic(final @Nullable ImmutableSchematic schematic) {
         this.schematic = schematic;
     }
 }

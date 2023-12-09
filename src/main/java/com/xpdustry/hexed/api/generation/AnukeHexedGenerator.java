@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.generation;
+package com.xpdustry.hexed.api.generation;
 
 import arc.math.Mathf;
 import arc.math.geom.Bresenham2;
@@ -25,8 +25,8 @@ import arc.math.geom.Intersector;
 import arc.math.geom.Vec2;
 import arc.util.Structs;
 import arc.util.noise.Simplex;
-import com.xpdustry.hexed.model.Hex;
-import com.xpdustry.hexed.model.Hexagon;
+import com.xpdustry.hexed.api.model.Hex;
+import com.xpdustry.hexed.api.model.SimpleHex;
 import java.util.ArrayList;
 import java.util.List;
 import mindustry.Vars;
@@ -37,9 +37,7 @@ import mindustry.world.Block;
  * Original code from Anuke.
  * I will be honest, I have no idea what some sections do, but if it works, it works...
  */
-public final class AnukeHexedGenerator implements MapGenerator<HexedMapContext> {
-
-    private static final AnukeHexedGenerator INSTANCE = new AnukeHexedGenerator();
+public class AnukeHexedGenerator implements MapGenerator<HexedMapContext> {
 
     private static final int DIAMETER = 74;
     private static final int SPACING = 78;
@@ -72,12 +70,6 @@ public final class AnukeHexedGenerator implements MapGenerator<HexedMapContext> 
         {Blocks.sporeWall, Blocks.sporeWall, Blocks.sporeWall, Blocks.sporeWall, Blocks.sporeWall, Blocks.stoneWall},
         {Blocks.iceWall, Blocks.snowWall, Blocks.snowWall, Blocks.snowWall, Blocks.stoneWall, Blocks.saltWall}
     };
-
-    public static AnukeHexedGenerator getInstance() {
-        return INSTANCE;
-    }
-
-    private AnukeHexedGenerator() {}
 
     @SuppressWarnings("ExtractMethodRecommender")
     @Override
@@ -120,7 +112,7 @@ public final class AnukeHexedGenerator implements MapGenerator<HexedMapContext> 
             for (int y = 0; y < HEIGHT / (h / 2) - 2; y++) {
                 final int cx = (int) (x * SPACING * 1.5 + (y % 2) * SPACING * 3.0 / 4) + SPACING / 2;
                 final int cy = (int) (y * h / 2) + SPACING / 2;
-                hexes.add(new Hexagon(y + (int) (x * (HEIGHT / (h / 2) - 2)), cx, cy, DIAMETER));
+                hexes.add(new SimpleHex(y + (int) (x * (HEIGHT / (h / 2) - 2)), cx, cy, DIAMETER));
             }
         }
         context.setHexes(hexes);
