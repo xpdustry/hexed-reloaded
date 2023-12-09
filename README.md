@@ -22,7 +22,7 @@ This plugin requires :
 
 ## Usage
 
-Once the plugin is installed on the server, use the `/hexed start` command 
+Once the plugin is installed on the server, use the `/hexed start` command
 to start a game with the vanilla generator from Anuke.
 If you have custom generator registered, specify its name when running the command such as `hexed start my-generator`.
 
