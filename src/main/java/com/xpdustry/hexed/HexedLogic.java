@@ -59,8 +59,7 @@ public final class HexedLogic implements PluginListener {
 
     @Override
     public void onPluginInit() {
-        final var parent = Vars.netServer.assigner;
-        Vars.netServer.assigner = new HexedTeamAssigner(this.hexed, parent);
+        Vars.netServer.assigner = new HexedTeamAssigner(this.hexed, Vars.netServer.assigner);
     }
 
     @EventHandler
@@ -93,7 +92,7 @@ public final class HexedLogic implements PluginListener {
             event.player().team(Team.derelict);
         } else {
             final var hex = hexes.get(Mathf.random(0, hexes.size() - 1));
-            placeLoadout(event.player(), hex.getTileX(), hex.getTileY());
+            this.placeBaseSchematic(event.player(), hex.getTileX(), hex.getTileY());
             this.hexed.getHexedState().updateProgress(hex);
         }
     }
@@ -107,6 +106,7 @@ public final class HexedLogic implements PluginListener {
     public void onPlayerQuit(final HexPlayerQuitEvent event) {
         if (this.hexed.isActive()) {
             this.killTeam(event.player().team());
+            event.player().unit().kill();
             event.player().team(Team.derelict);
             event.player().clearUnit();
         }
@@ -187,25 +187,7 @@ public final class HexedLogic implements PluginListener {
 
     private void killTeam(final Team team) {
         this.hexed.getHexedState().setDying(team, true);
-
-        for (int x = 0; x < Vars.world.width(); x++) {
-            for (int y = 0; y < Vars.world.height(); y++) {
-                final var tile = Vars.world.tile(x, y);
-                if (tile.build != null) {
-                    // TODO Use a queue for destroying blocks due to pvp autopause
-                    DistributorProvider.get()
-                            .getPluginScheduler()
-                            .scheduleSync(this.hexed)
-                            .delay(Mathf.random(6 * 60), MindustryTimeUnit.TICKS)
-                            .execute(() -> {
-                                // We never know
-                                if (tile.build != null && tile.team() == team) {
-                                    tile.build.kill();
-                                }
-                            });
-                }
-            }
-        }
+        team.data().destroyToDerelict();
         DistributorProvider.get()
                 .getPluginScheduler()
                 .scheduleAsync(this.hexed)
@@ -220,7 +202,7 @@ public final class HexedLogic implements PluginListener {
         final var winners = ArcCollections.immutableList(Vars.state.teams.getActive()).stream()
                 .map(data -> data.team)
                 .filter(team -> team != Team.derelict)
-                .collect(maxList(Comparator.comparing(
+                .collect(maxList(Comparator.comparingInt(
                         team -> this.hexed.getHexedState().getControlled(team).size())));
 
         if (winners.isEmpty()) {
@@ -242,12 +224,12 @@ public final class HexedLogic implements PluginListener {
         }
     }
 
-    private void placeLoadout(final Player player, int x, int y) {
-        final var core = this.hexed.getHexedState().getLoadout().tiles.find(s -> s.block instanceof CoreBlock);
+    private void placeBaseSchematic(final Player player, final int x, final int y) {
+        final var core = this.hexed.getHexedState().getBaseSchematic().tiles.find(s -> s.block instanceof CoreBlock);
         final int cx = x - core.x;
         final int cy = y - core.y;
 
-        for (final var stile : this.hexed.getHexedState().getLoadout().tiles) {
+        for (final var stile : this.hexed.getHexedState().getBaseSchematic().tiles) {
             final var tile = Vars.world.tile(stile.x + cx, stile.y + cy);
             if (tile == null) {
                 return;
@@ -271,11 +253,11 @@ public final class HexedLogic implements PluginListener {
     }
 
     // https://stackoverflow.com/a/29339106
-    static <T> Collector<T, ?, List<T>> maxList(Comparator<? super T> comp) {
+    static <T> Collector<T, ?, List<T>> maxList(final Comparator<? super T> comp) {
         return Collector.of(
                 ArrayList::new,
                 (list, t) -> {
-                    int c;
+                    final int c;
                     if (list.isEmpty() || (c = comp.compare(t, list.get(0))) == 0) {
                         list.add(t);
                     } else if (c > 0) {
@@ -290,7 +272,7 @@ public final class HexedLogic implements PluginListener {
                     if (list2.isEmpty()) {
                         return list1;
                     }
-                    int r = comp.compare(list1.get(0), list2.get(0));
+                    final int r = comp.compare(list1.get(0), list2.get(0));
                     if (r < 0) {
                         return list2;
                     } else if (r > 0) {

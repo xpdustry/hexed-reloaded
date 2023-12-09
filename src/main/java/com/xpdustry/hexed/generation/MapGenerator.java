@@ -16,39 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.model;
+package com.xpdustry.hexed.generation;
 
-import mindustry.Vars;
+public interface MapGenerator<C extends MapContext> {
 
-public interface Hex {
-
-    default float getX() {
-        return this.getTileX() * Vars.tilesize;
-    }
-
-    default float getY() {
-        return this.getTileY() * Vars.tilesize;
-    }
-
-    default float getDiameter() {
-        return this.getTileDiameter() * Vars.tilesize;
-    }
-
-    default float getRadius() {
-        return this.getDiameter() / 2F;
-    }
-
-    default int getTileRadius() {
-        return this.getTileDiameter() / 2;
-    }
-
-    int getIdentifier();
-
-    int getTileX();
-
-    int getTileY();
-
-    int getTileDiameter();
-
-    boolean contains(final int x, final int y);
+    C generate();
 }

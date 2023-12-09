@@ -23,72 +23,83 @@ import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.Flag;
 import com.xpdustry.hexed.HexedPluginReloaded;
-import com.xpdustry.hexed.generator.AnukeHexedGenerator;
-import com.xpdustry.hexed.generator.HexedGeneratorContext;
+import com.xpdustry.hexed.generation.AnukeHexedGenerator;
+import com.xpdustry.hexed.generation.HexedMapContext;
+import com.xpdustry.hexed.generation.MapGenerator;
+import com.xpdustry.hexed.generation.MapLoader;
 import fr.xpdustry.distributor.api.command.sender.CommandSender;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
-import fr.xpdustry.nucleus.mindustry.testing.map.MapGenerator;
-import fr.xpdustry.nucleus.mindustry.testing.map.MapLoader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
-import java.util.Optional;
 import mindustry.Vars;
 import mindustry.game.Schematic;
 import mindustry.game.Schematics;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class HexedStartCommand implements PluginListener {
 
-    private static final Map<String, MapGenerator<HexedGeneratorContext>> GENERATORS =
+    private static final Map<String, MapGenerator<HexedMapContext>> GENERATORS =
             Map.of("anuke", AnukeHexedGenerator.getInstance());
 
     private final HexedPluginReloaded hexed;
+    private final Path customBasesDirectory;
 
     public HexedStartCommand(final HexedPluginReloaded hexed) {
         this.hexed = hexed;
+        this.customBasesDirectory = this.hexed.getDirectory().resolve("bases");
     }
 
-    @CommandMethod("hexed [generator]")
+    @CommandMethod("hexed [generator] [base]")
     @CommandDescription("Begin hosting with the Hexed game mode.")
-    @CommandPermission("fr.xpdustry.hexed.start")
+    @CommandPermission("com.xpdustry.hexed.start")
     public void onHexedCommand(
             final CommandSender sender,
-            final @Argument("generator") String gen,
-            final @Flag("override-loadout") boolean override) {
+            final @Argument("generator") @Nullable String name,
+            final @Argument("base") @Nullable String base) {
         if (Vars.state.isGame()) {
             sender.sendWarning("Stop the server first.");
             return;
         }
 
-        if (gen != null && !GENERATORS.containsKey(gen)) {
-            sender.sendWarning("Unknown generator " + gen + ".");
+        if (name != null && !GENERATORS.containsKey(name)) {
+            sender.sendWarning("Unknown generator " + name + ".");
             return;
         }
 
-        Schematic loadout = null;
-        if (override) {
-            final var custom = getCustomLoadout();
-            if (custom.isEmpty()) {
-                sender.sendWarning("No custom loadout found.");
+        Schematic schematic = null;
+        if (base != null) {
+            final var file = this.customBasesDirectory.resolve(base + ".msch");
+            if (Files.exists(file)) {
+                try (final var stream = Files.newInputStream(file)) {
+                    schematic = Schematics.read(stream);
+                } catch (final IOException e) {
+                    throw new RuntimeException("Failed to load the base schematic in the custom bases directory", e);
+                }
+            } else {
+                sender.sendWarning("No custom base schematic named " + base + " found.");
                 return;
             }
-            loadout = custom.get();
         }
 
-        final MapGenerator<HexedGeneratorContext> generator =
-                gen == null ? AnukeHexedGenerator.getInstance() : GENERATORS.get(gen);
+        final MapGenerator<HexedMapContext> generator =
+                name == null ? AnukeHexedGenerator.getInstance() : GENERATORS.get(name);
+        if (generator == null) {
+            sender.sendWarning("Generator named " + name + " not found.");
+            return;
+        }
 
         try (final var loader = MapLoader.create()) {
             final var context = loader.load(generator);
             sender.sendMessage("Map generated.");
             this.hexed.getHexedState().setHexes(context.getHexes());
-            this.hexed.getHexedState().setLoadout(loadout == null ? context.getLoadout() : loadout);
-            Vars.state.rules = context.getRules();
+            this.hexed.getHexedState().setBaseSchematic(schematic == null ? context.getBaseSchematic() : schematic);
             sender.sendMessage("Server started.");
         } catch (final Exception e) {
-            sender.sendWarning("Failed to hexed with generator " + generator + ".");
+            sender.sendWarning("Failed to hexed with generator " + generator + ": " + e.getMessage());
+            this.hexed.getLogger().error("Oh no", e);
         }
     }
 
@@ -100,17 +111,5 @@ public final class HexedStartCommand implements PluginListener {
     @Override
     public void onPluginServerCommandsRegistration(final CommandHandler handler) {
         this.hexed.getServerCommandManager().getAnnotationParser().parse(this);
-    }
-
-    private Optional<Schematic> getCustomLoadout() {
-        var file = this.hexed.getDirectory().resolve("loadout.msch");
-        if (Files.exists(file)) {
-            try (final var stream = Files.newInputStream(file)) {
-                return Optional.of(Schematics.read(stream));
-            } catch (final IOException e) {
-                throw new RuntimeException("Failed to load the loadout in the plugin directory.", e);
-            }
-        }
-        return Optional.empty();
     }
 }

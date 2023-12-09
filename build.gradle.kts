@@ -58,7 +58,6 @@ repositories {
 dependencies {
     mindustryDependencies()
     compileOnly("fr.xpdustry:distributor-api:3.2.1")
-    implementation("fr.xpdustry:nucleus-mindustry-testing:2023.3.2")
 
     val junit = "5.10.1"
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junit")
@@ -148,7 +147,7 @@ indraSpotlessLicenser {
 tasks.withType<JavaCompile> {
     options.errorprone {
         disableWarningsInGeneratedCode.set(true)
-        disable("MissingSummary", "InlineMeSuggester")
+        disable("MissingSummary", "InlineMeSuggester", "FutureReturnValueIgnored")
         if (!name.contains("test", ignoreCase = true)) {
             check("NullAway", CheckSeverity.ERROR)
             option("NullAway:AnnotatedPackages", rootPackage)

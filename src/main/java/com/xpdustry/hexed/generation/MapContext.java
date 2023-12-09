@@ -16,33 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.generator;
+package com.xpdustry.hexed.generation;
 
-import com.xpdustry.hexed.model.Hex;
-import fr.xpdustry.nucleus.mindustry.testing.map.MapContext;
-import java.util.List;
-import java.util.function.Predicate;
 import mindustry.game.Rules;
-import mindustry.game.Schematic;
-import mindustry.world.Block;
-import mindustry.world.Tile;
 
-public interface HexedGeneratorContext extends MapContext {
+public interface MapContext {
 
-    void setTileIf(final int x, final int y, Predicate<Tile> condition, final Block block);
+    void resize(final int width, final int height);
 
-    void setTile(final int x, final int y, final Block floor, final Block overlay, final Block wall);
+    int getWidth();
 
-    void setRules(final Rules rules);
+    int getHeight();
+
+    MapTile getTile(int x, int y);
 
     Rules getRules();
 
-    List<Hex> getHexes();
+    void setRules(final Rules rules);
 
-    void setHexes(final List<Hex> hexes);
+    void forEachTile(final TileConsumer action);
 
-    // TODO Returns a mutable schematic, create a proxy class to prevent this
-    Schematic getLoadout();
-
-    void setLoadout(final Schematic loadout);
+    @FunctionalInterface
+    interface TileConsumer {
+        void accept(int x, int y, MapTile tile);
+    }
 }

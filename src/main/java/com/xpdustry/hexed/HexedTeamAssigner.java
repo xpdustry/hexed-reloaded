@@ -30,15 +30,19 @@ import mindustry.gen.Player;
 
 public final class HexedTeamAssigner implements TeamAssigner {
 
-    private final List<Team> teams =
-            Arrays.stream(Team.all).filter(t -> t.id > 6).collect(Collectors.toList());
     private final HexedPluginReloaded hexed;
     private final TeamAssigner parent;
+    private final List<Team> teams = Arrays.stream(Team.all)
+            .filter(t -> !Arrays.asList(Team.baseTeams).contains(t))
+            .collect(Collectors.toList());
+
+    {
+        Collections.shuffle(this.teams);
+    }
 
     public HexedTeamAssigner(final HexedPluginReloaded hexed, final TeamAssigner parent) {
         this.hexed = hexed;
         this.parent = parent;
-        Collections.shuffle(teams);
     }
 
     @Override
@@ -46,11 +50,11 @@ public final class HexedTeamAssigner implements TeamAssigner {
         final var used = Seq.with(players).map(Player::team).asSet();
 
         if (this.hexed.isActive()) {
-            for (final var team : teams) {
+            for (final var team : this.teams) {
                 if (!team.active()
                         && !used.contains(team)
                         && !this.hexed.getHexedState().isDying(team)) {
-                    Collections.shuffle(teams);
+                    Collections.shuffle(this.teams);
                     return team;
                 }
             }

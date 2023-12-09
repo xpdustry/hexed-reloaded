@@ -31,6 +31,8 @@ import fr.xpdustry.distributor.api.event.EventHandler;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
 import java.util.ArrayList;
 import java.util.List;
+import mindustry.Vars;
+import mindustry.core.GameState;
 import mindustry.game.EventType;
 import mindustry.game.Team;
 import mindustry.gen.Call;
@@ -61,8 +63,9 @@ public final class HexedRenderer implements PluginListener {
 
     @EventHandler
     public void onHexLost(final HexLostEvent event) {
-        event.player()
-                .sendMessage("[scarlet]You lost the hex #" + event.hex().getIdentifier() + " at ("
+        Call.announce(
+                event.player().con(),
+                "[scarlet]You lost the hex #" + event.hex().getIdentifier() + " at ("
                         + event.hex().getTileX() + ", " + event.hex().getTileY() + ")");
     }
 
@@ -74,11 +77,11 @@ public final class HexedRenderer implements PluginListener {
     }
 
     @EventHandler
-    public void onPlayEvent(final EventType.PlayEvent event) {
-        if (this.hexed.isActive()) {
+    public void onPlayEvent(final EventType.StateChangeEvent event) {
+        if (this.hexed.isActive() && event.to == GameState.State.playing) {
             for (final var hex : this.hexed.getHexedState().getHexes()) {
                 final var label = WorldLabel.create();
-                label.set(hex.getX(), hex.getY());
+                label.set(hex.getX(), hex.getY() + (Vars.tilesize / 2F));
                 label.text("#" + hex.getIdentifier());
                 label.flags(WorldLabel.flagOutline);
                 label.z(Layer.flyingUnitLow);
@@ -95,11 +98,11 @@ public final class HexedRenderer implements PluginListener {
         }
 
         if (this.timers.get(HUD_TIMER, Time.toSeconds / 5)) {
-            updateHud();
+            this.updateHud();
         }
 
         if (this.timers.get(DURATION_TIMER, Time.toSeconds)) {
-            updateDuration();
+            this.updateDuration();
         }
     }
 
@@ -149,7 +152,7 @@ public final class HexedRenderer implements PluginListener {
     }
 
     private void updateDuration() {
-        Call.infoPopup("Time: " + Strings.formatMillis(getRemainingTime()), 1, Align.bottom, 0, 0, 0, 0);
+        Call.infoPopup("Time: " + Strings.formatMillis(this.getRemainingTime()), 1, Align.bottom, 0, 0, 0, 0);
     }
 
     private long getRemainingTime() {

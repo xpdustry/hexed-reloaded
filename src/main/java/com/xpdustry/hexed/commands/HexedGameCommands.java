@@ -34,6 +34,7 @@ import fr.xpdustry.distributor.api.plugin.PluginListener;
 import java.util.stream.Collectors;
 import mindustry.game.Team;
 import mindustry.gen.Player;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class HexedGameCommands implements PluginListener {
 
@@ -51,7 +52,7 @@ public final class HexedGameCommands implements PluginListener {
 
     @CommandMethod("hexes [player]")
     @CommandDescription("Display the captured hexes of a player.")
-    public void onHexesCommand(final CommandSender sender, @Argument("player") Player player) {
+    public void onHexesCommand(final CommandSender sender, @Argument("player") @Nullable Player player) {
         if (player == null) {
             player = sender.getPlayer();
         }
@@ -97,7 +98,7 @@ public final class HexedGameCommands implements PluginListener {
 
     @CommandMethod("set-time <minutes>")
     @CommandDescription("Set the remaining time.")
-    @CommandPermission("fr.xpdustry.hexed.set-time")
+    @CommandPermission("com.xpdustry.hexed.set-time")
     public void onSetTimeCommand(final CommandSender sender, final @Argument("minutes") int minutes) {
         this.hexed.getHexedState().setCounter(HexedState.GAME_DURATION - (minutes * 60 * 60));
     }

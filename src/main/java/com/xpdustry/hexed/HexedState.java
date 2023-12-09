@@ -36,7 +36,6 @@ import mindustry.game.Schematic;
 import mindustry.game.Team;
 import mindustry.gen.Groups;
 import mindustry.world.blocks.storage.CoreBlock;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class HexedState {
@@ -53,7 +52,7 @@ public final class HexedState {
     private final IntMap<Timekeeper> spawnTimers = new IntMap<>();
     private final IntMap<IntFloatMap> progress = new IntMap<>();
     private float counter = 0f;
-    private @MonotonicNonNull Schematic loadout;
+    private Schematic base = HexedPluginReloaded.getDefaultBaseSchematic();
 
     public void setHexes(final List<Hex> hexes) {
         this.hexes.clear();
@@ -81,15 +80,17 @@ public final class HexedState {
     }
 
     public List<Hex> getHexes() {
-        return Collections.unmodifiableList(hexes);
+        return Collections.unmodifiableList(this.hexes);
     }
 
     public List<Hex> getControlled(final Team team) {
-        return this.hexes.stream().filter(hex -> getController(hex) == team).toList();
+        return this.hexes.stream()
+                .filter(hex -> this.getController(hex) == team)
+                .toList();
     }
 
     public @Nullable Team getController(final Hex hex) {
-        return controllers.get(hex);
+        return this.controllers.get(hex);
     }
 
     public @Nullable Hex getHex(final int x, final int y) {
@@ -97,7 +98,7 @@ public final class HexedState {
     }
 
     public boolean isDying(final Team team) {
-        return dying.contains(team);
+        return this.dying.contains(team);
     }
 
     public void setDying(final Team team, final boolean dying) {
@@ -120,12 +121,12 @@ public final class HexedState {
                 .reset();
     }
 
-    public Schematic getLoadout() {
-        return loadout;
+    public Schematic getBaseSchematic() {
+        return this.base;
     }
 
-    public void setLoadout(final Schematic loadout) {
-        this.loadout = loadout;
+    public void setBaseSchematic(final Schematic base) {
+        this.base = base;
     }
 
     public Map<Team, Integer> getLeaderboard() {
@@ -139,7 +140,7 @@ public final class HexedState {
         final var center = Vars.world.tile(hex.getTileX(), hex.getTileY());
 
         if (center.block() instanceof CoreBlock) {
-            controllers.put(hex, center.team());
+            this.controllers.put(hex, center.team());
         }
 
         final var progress = this.progress.get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new IntFloatMap(4));
@@ -172,18 +173,18 @@ public final class HexedState {
 
         final var data = Vars.state.teams.getActive().max(t -> progress.get(t.team.id));
         if (data != null && progress.get(data.team.id) >= ITEM_REQUIREMENT) {
-            controllers.put(hex, data.team);
+            this.controllers.put(hex, data.team);
             return;
         }
 
-        controllers.put(hex, null);
+        this.controllers.put(hex, null);
     }
 
     public float getProgress(final Hex hex, final Team team) {
-        final var progress = getProgress0(hex, team);
-        final var controller = getController(hex);
+        final var progress = this.getProgress0(hex, team);
+        final var controller = this.getController(hex);
         if (controller != null && controller != team) {
-            return (progress / getProgress0(hex, controller)) * 100F;
+            return (progress / this.getProgress0(hex, controller)) * 100F;
         }
         return progress;
     }

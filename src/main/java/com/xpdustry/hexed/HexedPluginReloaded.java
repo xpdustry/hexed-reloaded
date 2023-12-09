@@ -22,8 +22,13 @@ import arc.util.CommandHandler;
 import com.xpdustry.hexed.commands.AnnotationCommandManager;
 import com.xpdustry.hexed.commands.HexedGameCommands;
 import com.xpdustry.hexed.commands.HexedStartCommand;
+import com.xpdustry.hexed.generation.SimpleHexedMapContext;
 import fr.xpdustry.distributor.api.plugin.AbstractMindustryPlugin;
+import java.io.IOException;
+import java.util.Objects;
 import mindustry.Vars;
+import mindustry.game.Schematic;
+import mindustry.game.Schematics;
 
 @SuppressWarnings("unused")
 public final class HexedPluginReloaded extends AbstractMindustryPlugin {
@@ -34,6 +39,14 @@ public final class HexedPluginReloaded extends AbstractMindustryPlugin {
     private final AnnotationCommandManager serverCommandManager = new AnnotationCommandManager(this);
 
     private final HexedState state = new HexedState();
+
+    public static Schematic getDefaultBaseSchematic() {
+        try (final var stream = SimpleHexedMapContext.class.getResourceAsStream("/default.msch")) {
+            return Schematics.read(Objects.requireNonNull(stream));
+        } catch (final IOException e) {
+            throw new RuntimeException("Failed to load the default base schematic.", e);
+        }
+    }
 
     @Override
     public void onInit() {
@@ -63,10 +76,10 @@ public final class HexedPluginReloaded extends AbstractMindustryPlugin {
     }
 
     public AnnotationCommandManager getClientCommandManager() {
-        return clientCommandManager;
+        return this.clientCommandManager;
     }
 
     public AnnotationCommandManager getServerCommandManager() {
-        return serverCommandManager;
+        return this.serverCommandManager;
     }
 }
