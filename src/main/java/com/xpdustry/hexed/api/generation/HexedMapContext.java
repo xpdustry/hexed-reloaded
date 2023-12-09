@@ -16,39 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.model;
+package com.xpdustry.hexed.api.generation;
 
-import mindustry.Vars;
+import com.xpdustry.hexed.api.model.Hex;
+import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface Hex {
+public interface HexedMapContext extends MapContext {
 
-    default float getX() {
-        return this.getTileX() * Vars.tilesize;
-    }
+    List<Hex> getHexes();
 
-    default float getY() {
-        return this.getTileY() * Vars.tilesize;
-    }
+    void setHexes(final List<Hex> hexes);
 
-    default float getDiameter() {
-        return this.getTileDiameter() * Vars.tilesize;
-    }
+    @Nullable ImmutableSchematic getBaseSchematic();
 
-    default float getRadius() {
-        return this.getDiameter() / 2F;
-    }
-
-    default int getTileRadius() {
-        return this.getTileDiameter() / 2;
-    }
-
-    int getIdentifier();
-
-    int getTileX();
-
-    int getTileY();
-
-    int getTileDiameter();
-
-    boolean contains(final int x, final int y);
+    void setBaseSchematic(final @Nullable ImmutableSchematic schematic);
 }

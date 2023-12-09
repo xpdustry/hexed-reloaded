@@ -16,27 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.commands;
+package com.xpdustry.hexed.api;
 
-import cloud.commandframework.annotations.AnnotationParser;
-import fr.xpdustry.distributor.api.command.ArcCommandManager;
-import fr.xpdustry.distributor.api.command.sender.CommandSender;
-import fr.xpdustry.distributor.api.plugin.MindustryPlugin;
-import java.util.function.Function;
+import java.util.Objects;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-public final class AnnotationCommandManager extends ArcCommandManager<CommandSender> {
+public final class HexedAPIProvider {
 
-    private @MonotonicNonNull AnnotationParser<CommandSender> annotationParser = null;
+    private static @MonotonicNonNull HexedAPI INSTANCE = null;
 
-    public AnnotationCommandManager(final MindustryPlugin plugin) {
-        super(plugin, Function.identity(), Function.identity(), false);
+    public static HexedAPI get() {
+        return Objects.requireNonNull(INSTANCE, "The Hexed API is not initialized.");
     }
 
-    public AnnotationParser<CommandSender> getAnnotationParser() {
-        if (this.annotationParser == null) {
-            this.annotationParser = this.createAnnotationParser(CommandSender.class);
-        }
-        return this.annotationParser;
+    public static void set(final HexedAPI api) {
+        if (INSTANCE != null) throw new IllegalStateException("The Hexed API is already initialized.");
+        HexedAPIProvider.INSTANCE = api;
+    }
+
+    private HexedAPIProvider() {
+        throw new UnsupportedOperationException();
     }
 }

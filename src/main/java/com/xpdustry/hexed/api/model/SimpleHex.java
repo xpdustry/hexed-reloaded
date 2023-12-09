@@ -16,20 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.model;
+package com.xpdustry.hexed.api.model;
 
-public final class SquareHex implements Hex {
+import arc.math.geom.Intersector;
+
+public final class SimpleHex implements Hex {
 
     private final int identifier;
     private final int x;
     private final int y;
-    private final int size;
+    private final int diameter;
 
-    public SquareHex(final int identifier, final int x, final int y, final int size) {
+    public SimpleHex(final int identifier, final int x, final int y, final int diameter) {
         this.identifier = identifier;
         this.x = x;
         this.y = y;
-        this.size = size;
+        this.diameter = diameter;
     }
 
     @Override
@@ -49,14 +51,11 @@ public final class SquareHex implements Hex {
 
     @Override
     public int getTileDiameter() {
-        return this.size;
+        return this.diameter;
     }
 
     @Override
     public boolean contains(final int x, final int y) {
-        return x >= this.x - this.getTileRadius()
-                && x < this.x + this.getTileRadius()
-                && y >= this.y - this.getTileRadius()
-                && y < this.y + this.getTileRadius();
+        return Intersector.isInsideHexagon(this.x, this.y, this.diameter, x, y);
     }
 }

@@ -16,20 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.generation;
+package com.xpdustry.hexed.api.event;
 
-import java.util.List;
+import mindustry.game.Team;
+import mindustry.gen.Player;
 
-@FunctionalInterface
-public interface TileConsumer {
-
-    static TileConsumer aggregate(final List<? extends TileConsumer> consumers) {
-        return (x, y, tile) -> {
-            for (final var consumer : consumers) {
-                consumer.accept(x, y, tile);
-            }
-        };
-    }
-
-    void accept(int x, int y, MapTile tile);
-}
+public record HexPlayerQuitEvent(Player player, Team team, boolean real) {}

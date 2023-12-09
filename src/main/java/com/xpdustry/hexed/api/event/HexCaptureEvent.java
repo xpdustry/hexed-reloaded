@@ -16,19 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.generation;
+package com.xpdustry.hexed.api.event;
 
-import com.xpdustry.hexed.model.Hex;
-import java.util.List;
-import mindustry.game.Schematic;
+import com.xpdustry.hexed.api.model.Hex;
+import mindustry.gen.Player;
 
-public interface HexedMapContext extends MapContext {
-
-    List<Hex> getHexes();
-
-    void setHexes(final List<Hex> hexes);
-
-    Schematic getBaseSchematic();
-
-    void setBaseSchematic(final Schematic schematic);
-}
+public record HexCaptureEvent(Player player, Hex hex) {}
