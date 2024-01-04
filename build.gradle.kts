@@ -57,7 +57,7 @@ repositories {
 
 dependencies {
     mindustryDependencies()
-    compileOnly("fr.xpdustry:distributor-api:3.2.1")
+    compileOnly("fr.xpdustry:distributor-api:3.3.0")
 
     val junit = "5.10.1"
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junit")
@@ -197,7 +197,7 @@ val downloadDistributorCore =
     tasks.register<GithubArtifactDownload>("downloadDistributorCore") {
         user.set("xpdustry")
         repo.set("distributor")
-        version.set("v3.2.1")
+        version.set("v3.3.0")
         name.set("distributor-core.jar")
     }
 

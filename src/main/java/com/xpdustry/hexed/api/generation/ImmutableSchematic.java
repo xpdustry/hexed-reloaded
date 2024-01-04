@@ -53,7 +53,7 @@ public final class ImmutableSchematic {
             final int height,
             final SortedSet<String> labels,
             final Map<String, String> tags) {
-        this.tiles = tiles;
+        this.tiles = List.copyOf(tiles);
         this.width = width;
         this.height = height;
         this.labels = Collections.unmodifiableSortedSet(new TreeSet<>(labels));

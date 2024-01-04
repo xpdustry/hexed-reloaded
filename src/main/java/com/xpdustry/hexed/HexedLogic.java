@@ -45,7 +45,7 @@ import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.world.blocks.storage.CoreBlock;
 
-public final class HexedLogic implements PluginListener {
+final class HexedLogic implements PluginListener {
 
     private static final int CONTROLLER_TIMER = 0;
     private static final int PLAYER_TIMER = 1;

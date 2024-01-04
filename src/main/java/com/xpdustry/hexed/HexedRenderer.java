@@ -41,7 +41,7 @@ import mindustry.gen.Iconc;
 import mindustry.gen.WorldLabel;
 import mindustry.graphics.Layer;
 
-public final class HexedRenderer implements PluginListener {
+final class HexedRenderer implements PluginListener {
 
     private static final int HUD_TIMER = 0;
     private static final int DURATION_TIMER = 1;
