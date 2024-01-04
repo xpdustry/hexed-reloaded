@@ -1,0 +1,15 @@
+{
+  "name": "hexed-reloaded",
+  "author": "Xpdustry",
+  "displayName": "HexedPluginReloaded",
+  "description": "A reimplementation of the hexed gamemode, with more features and better performances.",
+  "repo": "xpdustry/hexed-reloaded",
+  "version": "1.0.0",
+  "java": true,
+  "hidden": true,
+  "main": "com.xpdustry.hexed.HexedPluginReloaded",
+  "minGameVersion": "146",
+  "dependencies": [
+    "distributor-core"
+  ]
+}

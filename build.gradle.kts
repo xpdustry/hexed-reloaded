@@ -17,20 +17,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.50.0"
 }
 
-val metadata =
-    ModMetadata(
-        name = "hexed-reloaded",
-        displayName = "HexedPluginReloaded",
-        author = "Xpdustry",
-        description = "A reimplementation of the hexed gamemode, with more features and better performances.",
-        version = "1.0.0",
-        minGameVersion = "146",
-        hidden = true,
-        java = true,
-        main = "com.xpdustry.hexed.HexedPluginReloaded",
-        repo = "xpdustry/hexed-reloaded",
-        dependencies = mutableListOf("distributor-core"),
-    )
+val metadata = ModMetadata.fromJson(file("plugin.json"))
 
 // Remove the following line if you don't want snapshot versions
 if (indraGit.headTag() == null) {
