@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.api.generation;
+package com.xpdustry.hexed.generation;
 
 import com.xpdustry.hexed.HexedPluginReloaded;
-import com.xpdustry.hexed.api.HexedAPI;
-import com.xpdustry.hexed.api.model.Hex;
+import com.xpdustry.hexed.HexedAPI;
+import com.xpdustry.hexed.model.Hex;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;

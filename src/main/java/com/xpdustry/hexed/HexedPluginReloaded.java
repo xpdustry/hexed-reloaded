@@ -19,15 +19,12 @@
 package com.xpdustry.hexed;
 
 import com.xpdustry.distributor.api.plugin.AbstractMindustryPlugin;
-import com.xpdustry.hexed.api.HexedAPI;
-import com.xpdustry.hexed.api.HexedAPIProvider;
-import com.xpdustry.hexed.api.HexedState;
-import com.xpdustry.hexed.api.generation.AnukeHexedGenerator;
-import com.xpdustry.hexed.api.generation.HexedMapContext;
-import com.xpdustry.hexed.api.generation.ImmutableSchematic;
-import com.xpdustry.hexed.api.generation.MapGenerator;
-import com.xpdustry.hexed.api.generation.MapLoader;
-import com.xpdustry.hexed.api.generation.SimpleHexedMapContext;
+import com.xpdustry.hexed.generation.AnukeHexedGenerator;
+import com.xpdustry.hexed.generation.HexedMapContext;
+import com.xpdustry.hexed.generation.ImmutableSchematic;
+import com.xpdustry.hexed.generation.MapGenerator;
+import com.xpdustry.hexed.generation.MapLoader;
+import com.xpdustry.hexed.generation.SimpleHexedMapContext;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;

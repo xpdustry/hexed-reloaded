@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.api;
+package com.xpdustry.hexed;
 
-import com.xpdustry.hexed.api.generation.ImmutableSchematic;
-import com.xpdustry.hexed.api.model.Hex;
+import com.xpdustry.hexed.generation.ImmutableSchematic;
+import com.xpdustry.hexed.model.Hex;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;

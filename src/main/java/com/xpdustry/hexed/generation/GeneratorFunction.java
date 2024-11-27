@@ -16,9 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.api.generation;
+package com.xpdustry.hexed.generation;
 
-public interface MapGenerator<C extends MapContext> {
+import java.util.Random;
 
-    C generate();
+public abstract class GeneratorFunction implements TileConsumer {
+
+    private static final Random RANDOM = new Random();
+    private int seed = 0;
+
+    public int getSeed() {
+        return this.seed;
+    }
+
+    public void setSeed(final int seed) {
+        this.seed = seed;
+    }
+
+    public void randomize() {
+        this.seed = RANDOM.nextInt(1_000_000_000);
+    }
 }

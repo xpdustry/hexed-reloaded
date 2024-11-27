@@ -16,8 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.api.event;
+package com.xpdustry.hexed.generation;
 
-import mindustry.gen.Player;
+import com.xpdustry.hexed.model.Hex;
+import java.time.Duration;
+import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public record HexPlayerJoinEvent(Player player, boolean real) {}
+public interface HexedMapContext extends MapContext {
+
+    List<Hex> getHexes();
+
+    void setHexes(final List<Hex> hexes);
+
+    Duration getDuration();
+
+    void setDuration(final Duration duration);
+
+    @Nullable ImmutableSchematic getBaseSchematic();
+
+    void setBaseSchematic(final @Nullable ImmutableSchematic schematic);
+}

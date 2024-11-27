@@ -16,9 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.api.event;
+package com.xpdustry.hexed;
 
-import com.xpdustry.hexed.api.model.Hex;
-import mindustry.gen.Player;
+import com.xpdustry.hexed.generation.HexedMapContext;
+import com.xpdustry.hexed.generation.ImmutableSchematic;
+import com.xpdustry.hexed.generation.MapGenerator;
+import java.time.Duration;
+import java.util.Map;
 
-public record HexLostEvent(Player player, Hex hex) {}
+public interface HexedAPI {
+
+    String HEXED_PRESENCE_FLAG = "xpdustry:hexed-reloaded";
+
+    Duration DEFAULT_GAME_DURATION = Duration.ofMinutes(90L);
+
+    HexedState getHexedState();
+
+    void registerGenerator(final String name, MapGenerator<HexedMapContext> generator);
+
+    Map<String, MapGenerator<HexedMapContext>> getGenerators();
+
+    ImmutableSchematic getDefaultBaseSchematic();
+
+    boolean isEnabled();
+
+    boolean start(final MapGenerator<HexedMapContext> generator);
+}

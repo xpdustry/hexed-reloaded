@@ -16,20 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.api.generation;
+package com.xpdustry.hexed.generation;
 
-import java.util.List;
+import mindustry.game.Rules;
 
-@FunctionalInterface
-public interface TileConsumer {
+public interface MapContext {
 
-    static TileConsumer aggregate(final List<? extends TileConsumer> consumers) {
-        return (x, y, tile) -> {
-            for (final var consumer : consumers) {
-                consumer.accept(x, y, tile);
-            }
-        };
-    }
+    void resize(final int width, final int height);
 
-    void accept(int x, int y, MapTile tile);
+    int getWidth();
+
+    int getHeight();
+
+    MapTile getTile(int x, int y);
+
+    Rules getRules();
+
+    void setRules(final Rules rules);
+
+    String getMapName();
+
+    void setMapName(final String name);
+
+    void forEachTile(final TileConsumer action);
+
+    void forEachTile(final int x, final int y, final int w, final int h, final TileConsumer action);
 }

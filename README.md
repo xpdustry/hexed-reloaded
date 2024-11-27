@@ -45,34 +45,34 @@ listen to the events produced by the plugin.
 import arc.Events;
 import arc.util.Log;
 import com.xpdustry.hexed.api.HexedAPIProvider;
-import com.xpdustry.hexed.api.event.HexCaptureEvent;
-import com.xpdustry.hexed.api.generation.HexedMapContext;
-import com.xpdustry.hexed.api.generation.MapGenerator;
-import com.xpdustry.hexed.api.generation.SimpleHexedMapContext;
+import com.xpdustry.hexed.event.HexCaptureEvent;
+import com.xpdustry.hexed.generation.HexedMapContext;
+import com.xpdustry.hexed.generation.MapGenerator;
+import com.xpdustry.hexed.generation.SimpleHexedMapContext;
 import mindustry.mod.Plugin;
 
 public final class MyPlugin extends Plugin {
 
-  @Override
-  public void init() {
-    HexedAPIProvider.get().registerGenerator("my-generator", new MyGenerator());
-
-    Events.on(HexCaptureEvent.class, event -> 
-      Log.info("@ captured the hex @", event.player().plainName(), event.hex().getIdentifier()));
-  }
-
-  private static final class MyGenerator implements MapGenerator<HexedMapContext> {
-
     @Override
-    public HexedMapContext generate() {
-      final var context = new SimpleHexedMapContext();
-      context.resize(300, 300);
-      /*
-       * Do your magic here
-       */
-      return context;
+    public void init() {
+        HexedAPIProvider.get().registerGenerator("my-generator", new MyGenerator());
+
+        Events.on(HexCaptureEvent.class, event ->
+                Log.info("@ captured the hex @", event.player().plainName(), event.hex().getIdentifier()));
     }
-  }
+
+    private static final class MyGenerator implements MapGenerator<HexedMapContext> {
+
+        @Override
+        public HexedMapContext generate() {
+            final var context = new SimpleHexedMapContext();
+            context.resize(300, 300);
+            /*
+             * Do your magic here
+             */
+            return context;
+        }
+    }
 }
 ```
 

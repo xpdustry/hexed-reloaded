@@ -16,24 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.api.generation;
+package com.xpdustry.hexed.generation;
 
-import com.xpdustry.hexed.api.model.Hex;
-import java.time.Duration;
 import java.util.List;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-public interface HexedMapContext extends MapContext {
+@FunctionalInterface
+public interface TileConsumer {
 
-    List<Hex> getHexes();
+    static TileConsumer aggregate(final List<? extends TileConsumer> consumers) {
+        return (x, y, tile) -> {
+            for (final var consumer : consumers) {
+                consumer.accept(x, y, tile);
+            }
+        };
+    }
 
-    void setHexes(final List<Hex> hexes);
-
-    Duration getDuration();
-
-    void setDuration(final Duration duration);
-
-    @Nullable ImmutableSchematic getBaseSchematic();
-
-    void setBaseSchematic(final @Nullable ImmutableSchematic schematic);
+    void accept(int x, int y, MapTile tile);
 }

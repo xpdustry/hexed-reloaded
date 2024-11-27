@@ -16,39 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.api.model;
+package com.xpdustry.hexed;
 
-import mindustry.Vars;
+import java.util.Objects;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-public interface Hex {
+public final class HexedAPIProvider {
 
-    default float getX() {
-        return this.getTileX() * Vars.tilesize;
+    private static @MonotonicNonNull HexedAPI INSTANCE = null;
+
+    public static HexedAPI get() {
+        return Objects.requireNonNull(INSTANCE, "The Hexed API is not initialized.");
     }
 
-    default float getY() {
-        return this.getTileY() * Vars.tilesize;
+    public static void set(final HexedAPI api) {
+        if (INSTANCE != null) throw new IllegalStateException("The Hexed API is already initialized.");
+        HexedAPIProvider.INSTANCE = api;
     }
 
-    default float getDiameter() {
-        return this.getTileDiameter() * Vars.tilesize;
+    private HexedAPIProvider() {
+        throw new UnsupportedOperationException();
     }
-
-    default float getRadius() {
-        return this.getDiameter() / 2F;
-    }
-
-    default int getTileRadius() {
-        return this.getTileDiameter() / 2;
-    }
-
-    int getIdentifier();
-
-    int getTileX();
-
-    int getTileY();
-
-    int getTileDiameter();
-
-    boolean contains(final int x, final int y);
 }

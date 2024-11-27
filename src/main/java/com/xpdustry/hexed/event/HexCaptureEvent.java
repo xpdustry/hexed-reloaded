@@ -16,29 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed.api.generation;
+package com.xpdustry.hexed.event;
 
-import mindustry.game.Rules;
+import com.xpdustry.hexed.model.Hex;
+import mindustry.gen.Player;
 
-public interface MapContext {
-
-    void resize(final int width, final int height);
-
-    int getWidth();
-
-    int getHeight();
-
-    MapTile getTile(int x, int y);
-
-    Rules getRules();
-
-    void setRules(final Rules rules);
-
-    String getMapName();
-
-    void setMapName(final String name);
-
-    void forEachTile(final TileConsumer action);
-
-    void forEachTile(final int x, final int y, final int w, final int h, final TileConsumer action);
-}
+public record HexCaptureEvent(Player player, Hex hex) {}
