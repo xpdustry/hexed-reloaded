@@ -37,7 +37,7 @@ import mindustry.gen.Groups;
 import mindustry.world.blocks.storage.CoreBlock;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-final class SimpleHexedState implements HexedState {
+final class HexedStateImpl implements HexedState {
 
     // Item requirement to capture a hex
     private static final int ITEM_REQUIREMENT = 210;
@@ -52,7 +52,7 @@ final class SimpleHexedState implements HexedState {
     private float counter = 0f;
     private final ImmutableSchematic base;
 
-    SimpleHexedState(final ImmutableSchematic base, final List<Hex> hexes, final Duration duration) {
+    HexedStateImpl(final ImmutableSchematic base, final List<Hex> hexes, final Duration duration) {
         this.base = base;
         this.duration = duration;
         this.hexes = List.copyOf(hexes);

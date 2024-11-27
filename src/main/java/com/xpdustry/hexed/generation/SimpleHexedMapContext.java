@@ -18,8 +18,6 @@
  */
 package com.xpdustry.hexed.generation;
 
-import com.xpdustry.hexed.HexedPluginReloaded;
-import com.xpdustry.hexed.HexedAPI;
 import com.xpdustry.hexed.model.Hex;
 import java.time.Duration;
 import java.util.Collections;
@@ -27,19 +25,18 @@ import java.util.List;
 import mindustry.content.Items;
 import mindustry.game.Gamemode;
 import mindustry.type.ItemStack;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SimpleHexedMapContext extends SimpleMapContext implements HexedMapContext {
 
     private List<Hex> hexes = Collections.emptyList();
-    private Duration duration = HexedAPI.DEFAULT_GAME_DURATION;
-    private @Nullable ImmutableSchematic schematic = null;
+    private Duration duration = DEFAULT_GAME_DURATION;
+    private ImmutableSchematic schematic = DEFAULT_BASE_SCHEMATIC;
 
     {
         final var rules = this.getRules();
         Gamemode.pvp.apply(rules);
         rules.pvp = true;
-        rules.tags.put(HexedPluginReloaded.HEXED_PRESENCE_FLAG, "true");
+        rules.tags.put(HEXED_PRESENCE_FLAG, "true");
         rules.loadout = ItemStack.list(
                 Items.copper,
                 300,
@@ -84,12 +81,12 @@ public class SimpleHexedMapContext extends SimpleMapContext implements HexedMapC
     }
 
     @Override
-    public @Nullable ImmutableSchematic getBaseSchematic() {
+    public ImmutableSchematic getBaseSchematic() {
         return this.schematic;
     }
 
     @Override
-    public void setBaseSchematic(final @Nullable ImmutableSchematic schematic) {
+    public void setBaseSchematic(final ImmutableSchematic schematic) {
         this.schematic = schematic;
     }
 }

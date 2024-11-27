@@ -22,11 +22,12 @@ import arc.util.CommandHandler;
 import com.xpdustry.distributor.api.DistributorProvider;
 import com.xpdustry.distributor.api.command.CommandSender;
 import com.xpdustry.distributor.api.command.cloud.MindustryCommandManager;
+import com.xpdustry.distributor.api.plugin.MindustryPlugin;
 import com.xpdustry.distributor.api.plugin.PluginListener;
+import com.xpdustry.distributor.api.service.ServiceProvider;
 import com.xpdustry.hexed.event.HexPlayerJoinEvent;
 import com.xpdustry.hexed.event.HexPlayerQuitEvent;
-import com.xpdustry.hexed.generation.HexedMapContext;
-import com.xpdustry.hexed.generation.MapGenerator;
+import com.xpdustry.hexed.generation.HexedMapGenerator;
 import java.time.Duration;
 import java.util.stream.Collectors;
 import mindustry.Vars;
@@ -43,15 +44,16 @@ import org.incendo.cloud.annotations.Permission;
 import org.incendo.cloud.annotations.ProxiedBy;
 import org.incendo.cloud.execution.ExecutionCoordinator;
 
+@Command("hexed")
 final class HexedCommands implements PluginListener {
 
-    private final HexedPluginReloaded hexed;
+    private final MindustryPlugin plugin;
 
-    public HexedCommands(final HexedPluginReloaded hexed) {
-        this.hexed = hexed;
+    public HexedCommands(final MindustryPlugin plugin) {
+        this.plugin = plugin;
     }
 
-    @Command("hexed start [generator]")
+    @Command("start [generator]")
     @CommandDescription("Begin hosting with the Hexed game mode.")
     @Permission("com.xpdustry.hexed.start")
     public void onHexedStartCommand(
@@ -61,14 +63,17 @@ final class HexedCommands implements PluginListener {
             return;
         }
 
-        final MapGenerator<HexedMapContext> generator =
-                HexedAPIProvider.get().getGenerators().get(name);
-        if (generator == null) {
+        final var generator =
+                DistributorProvider.get().getServiceManager().getProviders(HexedMapGenerator.class).stream()
+                        .map(ServiceProvider::getInstance)
+                        .filter(g -> g.getName().equals(name))
+                        .findFirst();
+        if (generator.isEmpty()) {
             sender.error("Generator named " + name + " not found.");
             return;
         }
 
-        if (HexedAPIProvider.get().start(generator)) {
+        if (HexedAPI.get().start(generator.get())) {
             sender.reply("Hexed game started.");
         } else {
             sender.error("An error occurred while starting the hexed game.");
@@ -78,10 +83,10 @@ final class HexedCommands implements PluginListener {
     @Command("leaderboard")
     @CommandDescription("Display the leaderboard.")
     public void onLeaderboardCommand(final CommandSender sender) {
-        sender.reply(HexedUtils.createLeaderboard(this.hexed.getHexedState()));
+        sender.reply(HexedUtils.createLeaderboard(HexedAPI.get().getHexedState()));
     }
 
-    @Command("hexed list [player]")
+    @Command("list [player]")
     @ProxiedBy("hexes")
     @CommandDescription("Display the captured hexes of a player.")
     public void onHexesCommand(final CommandSender sender, @Argument("player") @Nullable Player player) {
@@ -96,7 +101,7 @@ final class HexedCommands implements PluginListener {
             sender.error(player.coloredName() + " [white]is not in a team!");
             return;
         }
-        final var hexes = this.hexed.getHexedState().getControlled(player.team());
+        final var hexes = HexedAPI.get().getHexedState().getControlled(player.team());
         if (hexes.isEmpty()) {
             sender.error(player.coloredName() + "has not captured any hexes yet!");
             return;
@@ -109,7 +114,7 @@ final class HexedCommands implements PluginListener {
                         .collect(Collectors.joining(", ", "[", "]")));
     }
 
-    @Command("hexed spectate")
+    @Command("spectate")
     @CommandDescription("Spectate the game.")
     public void onSpectateCommand(final CommandSender sender) {
         if (sender.isServer()) {
@@ -140,11 +145,11 @@ final class HexedCommands implements PluginListener {
         }
     }
 
-    @Command("hexed set-time <minutes>")
+    @Command("set counter <duration>")
     @CommandDescription("Set the time counter.")
-    @Permission("com.xpdustry.hexed.set-time")
-    public void onSetTimeCommand(final CommandSender sender, final @Argument("minutes") int minutes) {
-        HexedAPIProvider.get().getHexedState().setCounter(Duration.ofMinutes(minutes));
+    @Permission("com.xpdustry.hexed.set.counter")
+    public void onSetTimeCommand(final @Argument("duration") Duration duration) {
+        HexedAPI.get().getHexedState().setCounter(duration);
     }
 
     @Override
@@ -159,7 +164,7 @@ final class HexedCommands implements PluginListener {
 
     private void onPluginSharedCommandsRegistration(final CommandHandler handler) {
         final var manager = new MindustryCommandManager<>(
-                this.hexed, handler, ExecutionCoordinator.simpleCoordinator(), SenderMapper.identity());
+                this.plugin, handler, ExecutionCoordinator.simpleCoordinator(), SenderMapper.identity());
         final var annotations = new AnnotationParser<>(manager, CommandSender.class);
         annotations.parse(this);
     }

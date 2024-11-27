@@ -18,19 +18,7 @@
  */
 package com.xpdustry.hexed.model;
 
-public final class Square implements Hex {
-
-    private final int identifier;
-    private final int x;
-    private final int y;
-    private final int size;
-
-    public Square(final int identifier, final int x, final int y, final int size) {
-        this.identifier = identifier;
-        this.x = x;
-        this.y = y;
-        this.size = size;
-    }
+record Rectangle(int identifier, int x, int y, int w, int h) implements Hex {
 
     @Override
     public int getIdentifier() {
@@ -49,14 +37,13 @@ public final class Square implements Hex {
 
     @Override
     public int getTileDiameter() {
-        return this.size;
+        return (this.w + this.h) / 2;
     }
 
     @Override
     public boolean contains(final int x, final int y) {
-        return x >= this.x - this.getTileRadius()
-                && x < this.x + this.getTileRadius()
-                && y >= this.y - this.getTileRadius()
-                && y < this.y + this.getTileRadius();
+        final var hw = (this.w / 2);
+        final var hh = (this.h / 2);
+        return x >= this.x - hw && x < this.x + hw && y >= this.y - hh && y < this.y + hh;
     }
 }

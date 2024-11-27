@@ -24,10 +24,13 @@ import arc.util.Interval;
 import arc.util.Strings;
 import arc.util.Time;
 import com.xpdustry.distributor.api.annotation.EventHandler;
+import com.xpdustry.distributor.api.annotation.TaskHandler;
 import com.xpdustry.distributor.api.plugin.PluginListener;
+import com.xpdustry.distributor.api.scheduler.MindustryTimeUnit;
 import com.xpdustry.hexed.event.HexCaptureEvent;
 import com.xpdustry.hexed.event.HexLostEvent;
 import com.xpdustry.hexed.event.HexPlayerQuitEvent;
+import com.xpdustry.hexed.event.HexedGameOverEvent;
 import com.xpdustry.hexed.model.Hex;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +74,7 @@ final class HexedRenderer implements PluginListener {
 
     @EventHandler
     public void onPlayerQuit(final HexPlayerQuitEvent event) {
-        if (!event.real()) {
+        if (event.virtual()) {
             Call.sendMessage(event.player().name() + " [white]died of cringe.");
         }
     }
@@ -88,6 +91,32 @@ final class HexedRenderer implements PluginListener {
                 label.fontSize(3.5F);
                 label.add();
             }
+        }
+    }
+
+    @EventHandler
+    public void onGameOverEvent(final HexedGameOverEvent event) {
+        if (event.winners().isEmpty()) {
+            Call.infoMessage("No one won the game, too bad...");
+        } else if (event.winners().size() == 1) {
+            final var winner =
+                    Groups.player.find(p -> p.team() == event.winners().get(0));
+            if (winner != null) {
+                Call.infoMessage(winner.coloredName() + " [accent]won the game with [white] "
+                        + this.hexed
+                                .getHexedState()
+                                .getControlled(event.winners().get(0))
+                                .size() + " []hexes!");
+            }
+        } else {
+            Call.infoMessage("The game ended in a draw!");
+        }
+    }
+
+    @TaskHandler(interval = 5L, unit = MindustryTimeUnit.MINUTES)
+    public void onLeaderboardDisplay() {
+        if (this.hexed.isEnabled() && Vars.state.isGame()) {
+            Call.sendMessage(HexedUtils.createLeaderboard(this.hexed.getHexedState()));
         }
     }
 

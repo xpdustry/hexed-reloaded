@@ -23,7 +23,6 @@ import arc.util.Interval;
 import arc.util.Time;
 import com.xpdustry.distributor.api.DistributorProvider;
 import com.xpdustry.distributor.api.annotation.EventHandler;
-import com.xpdustry.distributor.api.annotation.TaskHandler;
 import com.xpdustry.distributor.api.collection.MindustryCollections;
 import com.xpdustry.distributor.api.plugin.PluginListener;
 import com.xpdustry.distributor.api.scheduler.MindustryTimeUnit;
@@ -31,6 +30,7 @@ import com.xpdustry.hexed.event.HexCaptureEvent;
 import com.xpdustry.hexed.event.HexLostEvent;
 import com.xpdustry.hexed.event.HexPlayerJoinEvent;
 import com.xpdustry.hexed.event.HexPlayerQuitEvent;
+import com.xpdustry.hexed.event.HexedGameOverEvent;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -73,7 +73,7 @@ final class HexedLogic implements PluginListener {
         if (!this.hexed.isEnabled()) {
             return;
         }
-        if (!event.real()) {
+        if (event.virtual()) {
             event.player().team(Vars.netServer.assignTeam(event.player()));
         }
         if (event.player().team() == Team.derelict) {
@@ -100,7 +100,7 @@ final class HexedLogic implements PluginListener {
 
     @EventHandler
     public void onPlayerLeave(final EventType.PlayerLeave event) {
-        DistributorProvider.get().getEventBus().post(new HexPlayerQuitEvent(event.player, event.player.team(), true));
+        DistributorProvider.get().getEventBus().post(new HexPlayerQuitEvent(event.player, event.player.team(), false));
     }
 
     @EventHandler
@@ -122,13 +122,6 @@ final class HexedLogic implements PluginListener {
                 this.hexed.getHexedState0().resetSpawnTimer(hex);
                 this.hexed.getHexedState0().updateProgress(hex);
             }
-        }
-    }
-
-    @TaskHandler(interval = 5L, unit = MindustryTimeUnit.MINUTES)
-    public void onLeaderboardDisplay() {
-        if (this.hexed.isEnabled() && Vars.state.isGame()) {
-            Call.sendMessage(HexedUtils.createLeaderboard(this.hexed.getHexedState()));
         }
     }
 
@@ -167,7 +160,7 @@ final class HexedLogic implements PluginListener {
             for (final var player : Groups.player) {
                 if (player.team() != Team.derelict && player.team().cores().isEmpty()) {
                     final var oldTeam = player.team();
-                    DistributorProvider.get().getEventBus().post(new HexPlayerQuitEvent(player, oldTeam, false));
+                    DistributorProvider.get().getEventBus().post(new HexPlayerQuitEvent(player, oldTeam, true));
                 }
 
                 if (player.team() == Team.derelict) {
@@ -208,24 +201,9 @@ final class HexedLogic implements PluginListener {
                 .filter(team -> team != Team.derelict)
                 .collect(maxList(Comparator.comparingInt(
                         team -> this.hexed.getHexedState().getControlled(team).size())));
-
-        if (winners.isEmpty()) {
-            DistributorProvider.get().getEventBus().post(new GameOverEvent(Team.derelict));
-            Call.infoMessage("No one won the game, too bad...");
-        } else if (winners.size() == 1) {
-            DistributorProvider.get().getEventBus().post(new GameOverEvent(winners.get(0)));
-            final var winner = Groups.player.find(p -> p.team() == winners.get(0));
-            if (winner != null) {
-                Call.infoMessage(winner.coloredName() + " [accent]won the game with [white] "
-                        + this.hexed
-                                .getHexedState()
-                                .getControlled(winners.get(0))
-                                .size() + " []hexes!");
-            }
-        } else {
-            DistributorProvider.get().getEventBus().post(new GameOverEvent(Team.derelict));
-            Call.infoMessage("The game ended in a draw!");
-        }
+        final var bus = DistributorProvider.get().getEventBus();
+        bus.post(new GameOverEvent(winners.size() == 1 ? winners.get(0) : Team.derelict));
+        bus.post(new HexedGameOverEvent(winners));
     }
 
     @SuppressWarnings("EnumOrdinal")

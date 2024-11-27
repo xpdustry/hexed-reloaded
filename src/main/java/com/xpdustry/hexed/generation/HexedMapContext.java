@@ -21,9 +21,16 @@ package com.xpdustry.hexed.generation;
 import com.xpdustry.hexed.model.Hex;
 import java.time.Duration;
 import java.util.List;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import java.util.Objects;
+import mindustry.game.Schematics;
 
 public interface HexedMapContext extends MapContext {
+
+    ImmutableSchematic DEFAULT_BASE_SCHEMATIC = loadDefaultBaseSchematic();
+
+    String HEXED_PRESENCE_FLAG = "xpdustry:hexed-reloaded";
+
+    Duration DEFAULT_GAME_DURATION = Duration.ofMinutes(90L);
 
     List<Hex> getHexes();
 
@@ -33,7 +40,15 @@ public interface HexedMapContext extends MapContext {
 
     void setDuration(final Duration duration);
 
-    @Nullable ImmutableSchematic getBaseSchematic();
+    ImmutableSchematic getBaseSchematic();
 
-    void setBaseSchematic(final @Nullable ImmutableSchematic schematic);
+    void setBaseSchematic(final ImmutableSchematic schematic);
+
+    private static ImmutableSchematic loadDefaultBaseSchematic() {
+        try (final var stream = SimpleHexedMapContext.class.getResourceAsStream("/com/xpdustry/hexed/default.msch")) {
+            return new ImmutableSchematic(Schematics.read(Objects.requireNonNull(stream)));
+        } catch (final Exception e) {
+            throw new RuntimeException("Failed to load the default base schematic.", e);
+        }
+    }
 }

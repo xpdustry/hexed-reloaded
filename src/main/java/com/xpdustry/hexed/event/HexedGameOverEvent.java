@@ -16,25 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.xpdustry.hexed;
+package com.xpdustry.hexed.event;
 
-import java.util.Objects;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import java.util.List;
+import mindustry.game.Team;
 
-public final class HexedAPIProvider {
-
-    private static @MonotonicNonNull HexedAPI INSTANCE = null;
-
-    public static HexedAPI get() {
-        return Objects.requireNonNull(INSTANCE, "The Hexed API is not initialized.");
-    }
-
-    public static void set(final HexedAPI api) {
-        if (INSTANCE != null) throw new IllegalStateException("The Hexed API is already initialized.");
-        HexedAPIProvider.INSTANCE = api;
-    }
-
-    private HexedAPIProvider() {
-        throw new UnsupportedOperationException();
-    }
-}
+public record HexedGameOverEvent(List<Team> winners) {}

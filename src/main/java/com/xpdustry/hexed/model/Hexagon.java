@@ -20,19 +20,7 @@ package com.xpdustry.hexed.model;
 
 import arc.math.geom.Intersector;
 
-public final class SimpleHex implements Hex {
-
-    private final int identifier;
-    private final int x;
-    private final int y;
-    private final int diameter;
-
-    public SimpleHex(final int identifier, final int x, final int y, final int diameter) {
-        this.identifier = identifier;
-        this.x = x;
-        this.y = y;
-        this.diameter = diameter;
-    }
+record Hexagon(int identifier, int x, int y, int diameter) implements Hex {
 
     @Override
     public int getIdentifier() {
