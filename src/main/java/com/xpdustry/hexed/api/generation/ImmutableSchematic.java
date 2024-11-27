@@ -1,7 +1,7 @@
 /*
- * HexedPluginReloaded, A reimplementation of the hexed gamemode, with more features and better performances.
+ * HexedReloaded, A reimplementation of the hexed gamemode from Anuke, with more features and better performances.
  *
- * Copyright (C) 2023  Xpdustry
+ * Copyright (C) 2024  Xpdustry
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  */
 package com.xpdustry.hexed.api.generation;
 
-import fr.xpdustry.distributor.api.util.ArcCollections;
+import com.xpdustry.distributor.api.collection.MindustryCollections;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,14 +37,15 @@ public final class ImmutableSchematic {
     private final Map<String, String> tags;
 
     public ImmutableSchematic(final Schematic schematic) {
-        this.tiles = ArcCollections.immutableList(schematic.tiles).stream()
+        this.tiles = MindustryCollections.immutableList(schematic.tiles).stream()
                 .map(stile -> new ImmutableSchematic.Tile(
                         stile.x, stile.y, stile.block, stile.config, Tile.Rotation.from(stile.rotation)))
                 .toList();
         this.width = schematic.width;
         this.height = schematic.height;
-        this.labels = Collections.unmodifiableSortedSet(new TreeSet<>(ArcCollections.immutableList(schematic.labels)));
-        this.tags = Map.copyOf(ArcCollections.immutableMap(schematic.tags));
+        this.labels =
+                Collections.unmodifiableSortedSet(new TreeSet<>(MindustryCollections.immutableList(schematic.labels)));
+        this.tags = Map.copyOf(MindustryCollections.immutableMap(schematic.tags));
     }
 
     public ImmutableSchematic(

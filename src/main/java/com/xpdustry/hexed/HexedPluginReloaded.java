@@ -1,7 +1,7 @@
 /*
- * HexedPluginReloaded, A reimplementation of the hexed gamemode, with more features and better performances.
+ * HexedReloaded, A reimplementation of the hexed gamemode from Anuke, with more features and better performances.
  *
- * Copyright (C) 2023  Xpdustry
+ * Copyright (C) 2024  Xpdustry
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
  */
 package com.xpdustry.hexed;
 
+import com.xpdustry.distributor.api.plugin.AbstractMindustryPlugin;
 import com.xpdustry.hexed.api.HexedAPI;
 import com.xpdustry.hexed.api.HexedAPIProvider;
 import com.xpdustry.hexed.api.HexedState;
@@ -27,7 +28,6 @@ import com.xpdustry.hexed.api.generation.ImmutableSchematic;
 import com.xpdustry.hexed.api.generation.MapGenerator;
 import com.xpdustry.hexed.api.generation.MapLoader;
 import com.xpdustry.hexed.api.generation.SimpleHexedMapContext;
-import fr.xpdustry.distributor.api.plugin.AbstractMindustryPlugin;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;

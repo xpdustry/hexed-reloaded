@@ -1,7 +1,7 @@
 /*
- * HexedPluginReloaded, A reimplementation of the hexed gamemode, with more features and better performances.
+ * HexedReloaded, A reimplementation of the hexed gamemode from Anuke, with more features and better performances.
  *
- * Copyright (C) 2023  Xpdustry
+ * Copyright (C) 2024  Xpdustry
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,16 +21,16 @@ package com.xpdustry.hexed;
 import arc.math.Mathf;
 import arc.util.Interval;
 import arc.util.Time;
+import com.xpdustry.distributor.api.DistributorProvider;
+import com.xpdustry.distributor.api.annotation.EventHandler;
+import com.xpdustry.distributor.api.annotation.TaskHandler;
+import com.xpdustry.distributor.api.collection.MindustryCollections;
+import com.xpdustry.distributor.api.plugin.PluginListener;
+import com.xpdustry.distributor.api.scheduler.MindustryTimeUnit;
 import com.xpdustry.hexed.api.event.HexCaptureEvent;
 import com.xpdustry.hexed.api.event.HexLostEvent;
 import com.xpdustry.hexed.api.event.HexPlayerJoinEvent;
 import com.xpdustry.hexed.api.event.HexPlayerQuitEvent;
-import fr.xpdustry.distributor.api.DistributorProvider;
-import fr.xpdustry.distributor.api.event.EventHandler;
-import fr.xpdustry.distributor.api.plugin.PluginListener;
-import fr.xpdustry.distributor.api.scheduler.MindustryTimeUnit;
-import fr.xpdustry.distributor.api.scheduler.TaskHandler;
-import fr.xpdustry.distributor.api.util.ArcCollections;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -193,7 +193,7 @@ final class HexedLogic implements PluginListener {
         team.data().destroyToDerelict();
         DistributorProvider.get()
                 .getPluginScheduler()
-                .scheduleAsync(this.hexed)
+                .schedule(this.hexed)
                 .delay(8, MindustryTimeUnit.SECONDS)
                 .execute(() -> this.hexed.getHexedState0().setDying(team, false));
     }
@@ -202,7 +202,7 @@ final class HexedLogic implements PluginListener {
         if (!this.hexed.isEnabled() || Vars.state.gameOver) {
             return;
         }
-        final var winners = ArcCollections.immutableList(Vars.state.teams.getActive()).stream()
+        final var winners = MindustryCollections.immutableList(Vars.state.teams.getActive()).stream()
                 .map(data -> data.team)
                 .filter(team -> team != Team.derelict)
                 .collect(maxList(Comparator.comparingInt(

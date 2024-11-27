@@ -1,7 +1,7 @@
 /*
- * HexedPluginReloaded, A reimplementation of the hexed gamemode, with more features and better performances.
+ * HexedReloaded, A reimplementation of the hexed gamemode from Anuke, with more features and better performances.
  *
- * Copyright (C) 2023  Xpdustry
+ * Copyright (C) 2024  Xpdustry
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,90 +19,90 @@
 package com.xpdustry.hexed;
 
 import arc.util.CommandHandler;
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.ProxiedBy;
+import com.xpdustry.distributor.api.DistributorProvider;
+import com.xpdustry.distributor.api.command.CommandSender;
+import com.xpdustry.distributor.api.command.cloud.MindustryCommandManager;
+import com.xpdustry.distributor.api.plugin.PluginListener;
 import com.xpdustry.hexed.api.HexedAPIProvider;
 import com.xpdustry.hexed.api.event.HexPlayerJoinEvent;
 import com.xpdustry.hexed.api.event.HexPlayerQuitEvent;
 import com.xpdustry.hexed.api.generation.HexedMapContext;
 import com.xpdustry.hexed.api.generation.MapGenerator;
-import fr.xpdustry.distributor.api.DistributorProvider;
-import fr.xpdustry.distributor.api.command.ArcCommandManager;
-import fr.xpdustry.distributor.api.command.sender.CommandSender;
-import fr.xpdustry.distributor.api.plugin.PluginListener;
 import java.time.Duration;
 import java.util.stream.Collectors;
 import mindustry.Vars;
 import mindustry.game.Team;
 import mindustry.gen.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.incendo.cloud.SenderMapper;
+import org.incendo.cloud.annotations.AnnotationParser;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Default;
+import org.incendo.cloud.annotations.Permission;
+import org.incendo.cloud.annotations.ProxiedBy;
+import org.incendo.cloud.execution.ExecutionCoordinator;
 
 final class HexedCommands implements PluginListener {
 
     private final HexedPluginReloaded hexed;
-    private final ArcCommandManager<CommandSender> clientCommandManager;
-    private final ArcCommandManager<CommandSender> serverCommandManager;
 
     public HexedCommands(final HexedPluginReloaded hexed) {
         this.hexed = hexed;
-        this.clientCommandManager = ArcCommandManager.standard(hexed);
-        this.serverCommandManager = ArcCommandManager.standard(hexed);
     }
 
-    @CommandMethod("hexed start [generator]")
+    @Command("hexed start [generator]")
     @CommandDescription("Begin hosting with the Hexed game mode.")
-    @CommandPermission("com.xpdustry.hexed.start")
+    @Permission("com.xpdustry.hexed.start")
     public void onHexedStartCommand(
-            final CommandSender sender, final @Argument(value = "generator", defaultValue = "anuke") String name) {
+            final CommandSender sender, final @Argument(value = "generator") @Default("anuke") String name) {
         if (Vars.state.isGame()) {
-            sender.sendWarning("Stop the server first.");
+            sender.error("Stop the server first.");
             return;
         }
 
         final MapGenerator<HexedMapContext> generator =
                 HexedAPIProvider.get().getGenerators().get(name);
         if (generator == null) {
-            sender.sendWarning("Generator named " + name + " not found.");
+            sender.error("Generator named " + name + " not found.");
             return;
         }
 
         if (HexedAPIProvider.get().start(generator)) {
-            sender.sendMessage("Hexed game started.");
+            sender.reply("Hexed game started.");
         } else {
-            sender.sendWarning("An error occurred while starting the hexed game.");
+            sender.error("An error occurred while starting the hexed game.");
         }
     }
 
-    @CommandMethod("leaderboard")
+    @Command("leaderboard")
     @CommandDescription("Display the leaderboard.")
     public void onLeaderboardCommand(final CommandSender sender) {
-        sender.sendMessage(HexedUtils.createLeaderboard(this.hexed.getHexedState()));
+        sender.reply(HexedUtils.createLeaderboard(this.hexed.getHexedState()));
     }
 
-    @CommandMethod("hexed list [player]")
+    @Command("hexed list [player]")
     @ProxiedBy("hexes")
     @CommandDescription("Display the captured hexes of a player.")
     public void onHexesCommand(final CommandSender sender, @Argument("player") @Nullable Player player) {
         if (player == null) {
-            if (sender.isConsole()) {
-                sender.sendWarning("You need to specify the player.");
+            if (sender.isServer()) {
+                sender.error("You need to specify the player.");
                 return;
             }
             player = sender.getPlayer();
         }
         if (player.team() == Team.derelict) {
-            sender.sendWarning(player.coloredName() + " [white]is not in a team!");
+            sender.error(player.coloredName() + " [white]is not in a team!");
             return;
         }
         final var hexes = this.hexed.getHexedState().getControlled(player.team());
         if (hexes.isEmpty()) {
-            sender.sendWarning(player.coloredName() + "has not captured any hexes yet!");
+            sender.error(player.coloredName() + "has not captured any hexes yet!");
             return;
         }
-        sender.sendMessage(player.coloredName() + " [accent]have captured [white]"
+        sender.reply(player.coloredName() + " [accent]have captured [white]"
                 + hexes.size()
                 + "[accent] hexes at [white]"
                 + hexes.stream()
@@ -110,11 +110,11 @@ final class HexedCommands implements PluginListener {
                         .collect(Collectors.joining(", ", "[", "]")));
     }
 
-    @CommandMethod("hexed spectate")
+    @Command("hexed spectate")
     @CommandDescription("Spectate the game.")
     public void onSpectateCommand(final CommandSender sender) {
-        if (sender.isConsole()) {
-            sender.sendWarning("You can't do that.");
+        if (sender.isServer()) {
+            sender.error("You can't do that.");
             return;
         }
         if (sender.getPlayer().team() != Team.derelict) {
@@ -123,40 +123,45 @@ final class HexedCommands implements PluginListener {
                     .post(new HexPlayerQuitEvent(
                             sender.getPlayer(), sender.getPlayer().team(), false));
         } else {
-            sender.sendWarning("You are already spectating.");
+            sender.error("You are already spectating.");
         }
     }
 
-    @CommandMethod("hexed join")
+    @Command("hexed join")
     @CommandDescription("Join the game.")
     public void onJoinCommand(final CommandSender sender) {
-        if (sender.isConsole()) {
-            sender.sendWarning("You can't do that.");
+        if (sender.isServer()) {
+            sender.error("You can't do that.");
             return;
         }
         if (sender.getPlayer().team() == Team.derelict) {
             DistributorProvider.get().getEventBus().post(new HexPlayerJoinEvent(sender.getPlayer(), false));
         } else {
-            sender.sendWarning("You are already in the game.");
+            sender.error("You are already in the game.");
         }
     }
 
-    @CommandMethod("hexed set-time <minutes>")
+    @Command("hexed set-time <minutes>")
     @CommandDescription("Set the time counter.")
-    @CommandPermission("com.xpdustry.hexed.set-time")
+    @Permission("com.xpdustry.hexed.set-time")
     public void onSetTimeCommand(final CommandSender sender, final @Argument("minutes") int minutes) {
         HexedAPIProvider.get().getHexedState().setCounter(Duration.ofMinutes(minutes));
     }
 
     @Override
     public void onPluginServerCommandsRegistration(final CommandHandler handler) {
-        this.serverCommandManager.initialize(handler);
-        this.serverCommandManager.createAnnotationParser(CommandSender.class).parse(this);
+        this.onPluginSharedCommandsRegistration(handler);
     }
 
     @Override
     public void onPluginClientCommandsRegistration(final CommandHandler handler) {
-        this.clientCommandManager.initialize(handler);
-        this.clientCommandManager.createAnnotationParser(CommandSender.class).parse(this);
+        this.onPluginSharedCommandsRegistration(handler);
+    }
+
+    private void onPluginSharedCommandsRegistration(final CommandHandler handler) {
+        final var manager = new MindustryCommandManager<>(
+                this.hexed, handler, ExecutionCoordinator.simpleCoordinator(), SenderMapper.identity());
+        final var annotations = new AnnotationParser<>(manager, CommandSender.class);
+        annotations.parse(this);
     }
 }
