@@ -20,6 +20,7 @@ package com.xpdustry.hexed.api;
 
 import com.xpdustry.hexed.api.generation.ImmutableSchematic;
 import com.xpdustry.hexed.api.model.Hex;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,10 +28,6 @@ import mindustry.game.Team;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface HexedState {
-
-    float getTime();
-
-    void setTime(final float counter);
 
     List<Hex> getHexes();
 
@@ -47,6 +44,14 @@ public interface HexedState {
     ImmutableSchematic getBaseSchematic();
 
     float getProgress(final Hex hex, final Team team);
+
+    Duration getDuration();
+
+    Duration getCounter();
+
+    void setCounter(final Duration counter);
+
+    void incrementCounter(final float delta);
 
     default Map<Team, Integer> getLeaderboard() {
         return this.getHexes().stream()

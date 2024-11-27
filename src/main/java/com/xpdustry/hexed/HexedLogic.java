@@ -31,6 +31,7 @@ import fr.xpdustry.distributor.api.plugin.PluginListener;
 import fr.xpdustry.distributor.api.scheduler.MindustryTimeUnit;
 import fr.xpdustry.distributor.api.scheduler.TaskHandler;
 import fr.xpdustry.distributor.api.util.ArcCollections;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -134,10 +135,10 @@ final class HexedLogic implements PluginListener {
     @Override
     public void onPluginUpdate() {
         if (!this.hexed.isEnabled()) {
-            this.hexed.getHexedState().setTime(0);
+            this.hexed.getHexedState().setCounter(Duration.ZERO);
             return;
         } else {
-            this.hexed.getHexedState().setTime(this.hexed.getHexedState().getTime() + Time.delta);
+            this.hexed.getHexedState().incrementCounter(Time.delta);
         }
 
         if (this.interval.get(CONTROLLER_TIMER, 2 * 60)) {
@@ -181,7 +182,8 @@ final class HexedLogic implements PluginListener {
             }
         }
 
-        if (this.hexed.getHexedState().getTime() > this.hexed.getDuration()) {
+        if (this.hexed.getHexedState().getCounter().toMillis()
+                > this.hexed.getHexedState().getDuration().toMillis()) {
             this.endGame();
         }
     }

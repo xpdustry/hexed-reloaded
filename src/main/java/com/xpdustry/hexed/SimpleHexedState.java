@@ -21,10 +21,12 @@ package com.xpdustry.hexed;
 import arc.math.geom.Point2;
 import arc.struct.IntFloatMap;
 import arc.struct.IntMap;
+import arc.util.Time;
 import arc.util.Timekeeper;
 import com.xpdustry.hexed.api.HexedState;
 import com.xpdustry.hexed.api.generation.ImmutableSchematic;
 import com.xpdustry.hexed.api.model.Hex;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,25 +49,17 @@ final class SimpleHexedState implements HexedState {
     private final IntMap<Hex> positions = new IntMap<>();
     private final IntMap<Timekeeper> spawnTimers = new IntMap<>();
     private final IntMap<IntFloatMap> progress = new IntMap<>();
+    private final Duration duration;
     private float counter = 0f;
     private final ImmutableSchematic base;
 
-    SimpleHexedState(final ImmutableSchematic base, final List<Hex> hexes) {
+    SimpleHexedState(final ImmutableSchematic base, final List<Hex> hexes, final Duration duration) {
         this.base = base;
+        this.duration = duration;
         this.hexes = List.copyOf(hexes);
         for (final var hex : this.hexes) {
             this.positions.put(Point2.pack(hex.getTileX(), hex.getTileY()), hex);
         }
-    }
-
-    @Override
-    public void setTime(final float counter) {
-        this.counter = counter;
-    }
-
-    @Override
-    public float getTime() {
-        return this.counter;
     }
 
     @Override
@@ -115,6 +109,26 @@ final class SimpleHexedState implements HexedState {
         } else {
             this.dying.remove(team);
         }
+    }
+
+    @Override
+    public Duration getDuration() {
+        return this.duration;
+    }
+
+    @Override
+    public void setCounter(final Duration counter) {
+        this.counter = counter.toMillis() * Time.toSeconds;
+    }
+
+    @Override
+    public Duration getCounter() {
+        return Duration.ofMillis((long) ((this.counter / Time.toSeconds) * 1000L));
+    }
+
+    @Override
+    public void incrementCounter(final float delta) {
+        this.counter += delta;
     }
 
     @Override

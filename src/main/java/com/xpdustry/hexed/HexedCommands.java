@@ -33,6 +33,7 @@ import fr.xpdustry.distributor.api.DistributorProvider;
 import fr.xpdustry.distributor.api.command.ArcCommandManager;
 import fr.xpdustry.distributor.api.command.sender.CommandSender;
 import fr.xpdustry.distributor.api.plugin.PluginListener;
+import java.time.Duration;
 import java.util.stream.Collectors;
 import mindustry.Vars;
 import mindustry.game.Team;
@@ -144,7 +145,7 @@ final class HexedCommands implements PluginListener {
     @CommandDescription("Set the time counter.")
     @CommandPermission("com.xpdustry.hexed.set-time")
     public void onSetTimeCommand(final CommandSender sender, final @Argument("minutes") int minutes) {
-        HexedAPIProvider.get().getHexedState().setTime(minutes * 60 * 60);
+        HexedAPIProvider.get().getHexedState().setCounter(Duration.ofMinutes(minutes));
     }
 
     @Override

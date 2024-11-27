@@ -19,6 +19,7 @@
 package com.xpdustry.hexed.api.generation;
 
 import com.xpdustry.hexed.api.model.Hex;
+import java.time.Duration;
 import java.util.List;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -27,6 +28,10 @@ public interface HexedMapContext extends MapContext {
     List<Hex> getHexes();
 
     void setHexes(final List<Hex> hexes);
+
+    Duration getDuration();
+
+    void setDuration(final Duration duration);
 
     @Nullable ImmutableSchematic getBaseSchematic();
 

@@ -152,11 +152,13 @@ final class HexedRenderer implements PluginListener {
     }
 
     private void updateDuration() {
-        Call.infoPopup("Time: " + Strings.formatMillis(this.getRemainingTime()), 1, Align.bottom, 0, 0, 0, 0);
-    }
-
-    private long getRemainingTime() {
-        return Math.max(
-                (long) (((this.hexed.getDuration() - this.hexed.getHexedState().getTime()) / 60F) * 1000L), 0L);
+        final var remaining = Math.max(
+                this.hexed
+                        .getHexedState()
+                        .getDuration()
+                        .minus(this.hexed.getHexedState().getCounter())
+                        .toMillis(),
+                0L);
+        Call.infoPopup("Time: " + Strings.formatMillis(remaining), 1, Align.bottom, 0, 0, 0, 0);
     }
 }

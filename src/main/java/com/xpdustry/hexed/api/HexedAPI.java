@@ -21,11 +21,14 @@ package com.xpdustry.hexed.api;
 import com.xpdustry.hexed.api.generation.HexedMapContext;
 import com.xpdustry.hexed.api.generation.ImmutableSchematic;
 import com.xpdustry.hexed.api.generation.MapGenerator;
+import java.time.Duration;
 import java.util.Map;
 
 public interface HexedAPI {
 
     String HEXED_PRESENCE_FLAG = "xpdustry:hexed-reloaded";
+
+    Duration DEFAULT_GAME_DURATION = Duration.ofMinutes(90L);
 
     HexedState getHexedState();
 
@@ -38,8 +41,4 @@ public interface HexedAPI {
     boolean isEnabled();
 
     boolean start(final MapGenerator<HexedMapContext> generator);
-
-    int getDuration();
-
-    void setDuration(final int duration);
 }

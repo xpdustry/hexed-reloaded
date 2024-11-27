@@ -19,7 +19,9 @@
 package com.xpdustry.hexed.api.generation;
 
 import com.xpdustry.hexed.HexedPluginReloaded;
+import com.xpdustry.hexed.api.HexedAPI;
 import com.xpdustry.hexed.api.model.Hex;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import mindustry.content.Items;
@@ -30,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class SimpleHexedMapContext extends SimpleMapContext implements HexedMapContext {
 
     private List<Hex> hexes = Collections.emptyList();
+    private Duration duration = HexedAPI.DEFAULT_GAME_DURATION;
     private @Nullable ImmutableSchematic schematic = null;
 
     {
@@ -68,6 +71,16 @@ public class SimpleHexedMapContext extends SimpleMapContext implements HexedMapC
     @Override
     public void setHexes(final List<Hex> hexes) {
         this.hexes = List.copyOf(hexes);
+    }
+
+    @Override
+    public Duration getDuration() {
+        return this.duration;
+    }
+
+    @Override
+    public void setDuration(final Duration duration) {
+        this.duration = duration;
     }
 
     @Override

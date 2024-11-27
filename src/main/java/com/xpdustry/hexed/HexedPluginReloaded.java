@@ -29,6 +29,7 @@ import com.xpdustry.hexed.api.generation.MapLoader;
 import com.xpdustry.hexed.api.generation.SimpleHexedMapContext;
 import fr.xpdustry.distributor.api.plugin.AbstractMindustryPlugin;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +44,6 @@ public final class HexedPluginReloaded extends AbstractMindustryPlugin implement
     private final Map<String, MapGenerator<HexedMapContext>> generators = new HashMap<>();
     private @MonotonicNonNull SimpleHexedState state = null;
     private @MonotonicNonNull ImmutableSchematic defaultBase = null;
-    private int duration = 60 * 60 * 90;
 
     @Override
     public HexedState getHexedState() {
@@ -85,22 +85,12 @@ public final class HexedPluginReloaded extends AbstractMindustryPlugin implement
             final var context = loader.load(generator);
             this.getLogger().info("Generated hexed map, took {} milliseconds.", System.currentTimeMillis() - start);
             final var base = context.getBaseSchematic() == null ? this.defaultBase : context.getBaseSchematic();
-            this.state = new SimpleHexedState(base, context.getHexes());
+            this.state = new SimpleHexedState(base, context.getHexes(), context.getDuration());
             return true;
         } catch (final Exception e) {
             this.getLogger().error("Failed to host a hexed game", e);
             return false;
         }
-    }
-
-    @Override
-    public int getDuration() {
-        return this.duration;
-    }
-
-    @Override
-    public void setDuration(final int duration) {
-        this.duration = duration;
     }
 
     @Override
@@ -114,7 +104,7 @@ public final class HexedPluginReloaded extends AbstractMindustryPlugin implement
         }
 
         this.generators.put("anuke", new AnukeHexedGenerator());
-        this.state = new SimpleHexedState(this.defaultBase, Collections.emptyList());
+        this.state = new SimpleHexedState(this.defaultBase, Collections.emptyList(), Duration.ZERO);
 
         this.addListener(new HexedLogic(this));
         this.addListener(new HexedRenderer(this));
