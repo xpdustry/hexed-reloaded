@@ -56,7 +56,7 @@ dependencies {
     testImplementation("org.checkerframework:checker-qual:$checker")
 
     // Static analysis
-    annotationProcessor("com.uber.nullaway:nullaway:0.10.18")
+    annotationProcessor("com.uber.nullaway:nullaway:0.12.1")
     errorprone("com.google.errorprone:error_prone_core:2.23.0")
 }
 
