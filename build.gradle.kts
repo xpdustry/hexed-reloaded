@@ -180,6 +180,12 @@ tasks.build {
     dependsOn(tasks.shadowJar)
 }
 
+tasks.register<Copy>("release") {
+    dependsOn(tasks.build)
+    from(tasks.shadowJar)
+    destinationDir = temporaryDir
+}
+
 val downloadDistributorCore =
     tasks.register<GithubArtifactDownload>("downloadDistributorCore") {
         user.set("xpdustry")
