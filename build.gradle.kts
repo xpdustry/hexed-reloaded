@@ -57,7 +57,7 @@ dependencies {
 
     // Static analysis
     annotationProcessor("com.uber.nullaway:nullaway:0.10.18")
-    errorprone("com.google.errorprone:error_prone_core:2.23.0")
+    errorprone("com.google.errorprone:error_prone_core:2.36.0")
 }
 
 indra {
