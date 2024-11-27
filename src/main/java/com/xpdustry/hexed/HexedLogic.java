@@ -188,6 +188,7 @@ final class HexedLogic implements PluginListener {
         }
     }
 
+    @SuppressWarnings("FutureReturnValueIgnored")
     private void killTeam(final Team team) {
         this.hexed.getHexedState0().setDying(team, true);
         team.data().destroyToDerelict();
@@ -227,6 +228,7 @@ final class HexedLogic implements PluginListener {
         }
     }
 
+    @SuppressWarnings("EnumOrdinal")
     private void placeBaseSchematic(final Player player, final int x, final int y) {
         final var core = this.hexed.getHexedState().getBaseSchematic().getTiles().stream()
                 .filter(s -> s.block() instanceof CoreBlock)

@@ -18,7 +18,7 @@ This plugin requires :
 
 - Mindustry v146 or above.
 
-- [Distributor](https://github.com/xpdustry/distributor) v3.2.1.
+- [Distributor](https://github.com/xpdustry/distributor) v4.0.0.
 
 ## Usage
 
@@ -84,5 +84,3 @@ public final class MyPlugin extends Plugin {
 - `./gradlew jar` for a plain jar that contains only the plugin code.
 
 - `./gradlew runMindustryServer` to run the plugin in a local Mindustry server.
-
-- `./gradlew test` to run the unit tests of the plugin.

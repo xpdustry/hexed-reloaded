@@ -99,9 +99,7 @@ val generateMetadataFile by tasks.registering {
     inputs.property("metadata", metadata)
     val output = temporaryDir.resolve("plugin.json")
     outputs.file(output)
-    doLast {
-        output.writeText(ModMetadata.toJson(metadata))
-    }
+    doLast { output.writeText(ModMetadata.toJson(metadata)) }
 }
 
 tasks.shadowJar {
@@ -109,7 +107,11 @@ tasks.shadowJar {
     archiveClassifier = "plugin"
     from(generateMetadataFile)
     from(rootProject.file("LICENSE.md")) { into("META-INF") }
+    relocate("com.xpdustry.distributor.api.command.cloud", "com.xpdustry.hexed.shadow.cloud")
+    relocate("org.incendo.cloud", "com.xpdustry.hexed.shadow.cloud")
+    relocate("io.leangen.geantyref", "com.xpdustry.hexed.shadow.geantyref")
     minimize()
+    mergeServiceFiles()
 }
 
 tasks.register<Copy>("release") {
