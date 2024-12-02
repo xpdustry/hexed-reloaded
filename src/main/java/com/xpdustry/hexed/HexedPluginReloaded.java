@@ -18,8 +18,13 @@
  */
 package com.xpdustry.hexed;
 
+import com.xpdustry.distributor.api.DistributorProvider;
+import com.xpdustry.distributor.api.annotation.PluginAnnotationProcessor;
 import com.xpdustry.distributor.api.plugin.AbstractMindustryPlugin;
+import com.xpdustry.distributor.api.plugin.PluginListener;
+import com.xpdustry.hexed.generation.AnukeHexedGenerator;
 import com.xpdustry.hexed.generation.HexedMapContext;
+import com.xpdustry.hexed.generation.HexedMapGenerator;
 import com.xpdustry.hexed.generation.MapGenerator;
 import com.xpdustry.hexed.generation.MapLoader;
 import mindustry.Vars;
@@ -28,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 @SuppressWarnings("unused")
 public final class HexedPluginReloaded extends AbstractMindustryPlugin implements HexedAPI {
 
+    private final PluginAnnotationProcessor<?> processor = PluginAnnotationProcessor.events(this);
     private @MonotonicNonNull HexedStateImpl state = null;
 
     @Override
@@ -51,7 +57,11 @@ public final class HexedPluginReloaded extends AbstractMindustryPlugin implement
             final var start = System.currentTimeMillis();
             final var context = loader.load(generator);
             this.getLogger().info("Generated hexed map in {} milliseconds.", System.currentTimeMillis() - start);
-            this.state = new HexedStateImpl(context.getBaseSchematic(), context.getHexes(), context.getDuration());
+            this.state = new HexedStateImpl(
+                    context.getBaseSchematic(),
+                    context.getCaptureCalculator(),
+                    context.getHexes(),
+                    context.getDuration());
             return true;
         } catch (final Exception e) {
             this.getLogger().error("Failed to host a hexed game", e);
@@ -61,8 +71,17 @@ public final class HexedPluginReloaded extends AbstractMindustryPlugin implement
 
     @Override
     public void onInit() {
+        DistributorProvider.get()
+                .getServiceManager()
+                .register(this, HexedMapGenerator.class, new AnukeHexedGenerator());
         this.addListener(new HexedLogic(this));
         this.addListener(new HexedRenderer(this));
         this.addListener(new HexedCommands(this));
+    }
+
+    @Override
+    protected void addListener(final PluginListener listener) {
+        super.addListener(listener);
+        this.processor.process(listener);
     }
 }

@@ -31,7 +31,6 @@ import com.xpdustry.hexed.event.HexLostEvent;
 import com.xpdustry.hexed.event.HexPlayerJoinEvent;
 import com.xpdustry.hexed.event.HexPlayerQuitEvent;
 import com.xpdustry.hexed.event.HexedGameOverEvent;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -128,11 +127,10 @@ final class HexedLogic implements PluginListener {
     @Override
     public void onPluginUpdate() {
         if (!this.hexed.isEnabled()) {
-            this.hexed.getHexedState().setCounter(Duration.ZERO);
             return;
-        } else {
-            this.hexed.getHexedState().incrementCounter(Time.delta);
         }
+
+        this.hexed.getHexedState().incrementCounter(Time.delta);
 
         if (this.interval.get(CONTROLLER_TIMER, 2 * 60)) {
             for (final var hex : this.hexed.getHexedState().getHexes()) {

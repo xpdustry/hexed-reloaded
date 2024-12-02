@@ -33,14 +33,9 @@ import java.util.Map;
 import java.util.Set;
 import mindustry.Vars;
 import mindustry.game.Team;
-import mindustry.gen.Groups;
-import mindustry.world.blocks.storage.CoreBlock;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 final class HexedStateImpl implements HexedState {
-
-    // Item requirement to capture a hex
-    private static final int ITEM_REQUIREMENT = 210;
 
     private final Map<Hex, Team> controllers = new HashMap<>();
     private final List<Hex> hexes;
@@ -51,9 +46,15 @@ final class HexedStateImpl implements HexedState {
     private final Duration duration;
     private float counter = 0f;
     private final ImmutableSchematic base;
+    private final HexedCaptureProgress calculator;
 
-    HexedStateImpl(final ImmutableSchematic base, final List<Hex> hexes, final Duration duration) {
+    HexedStateImpl(
+            final ImmutableSchematic base,
+            final HexedCaptureProgress calculator,
+            final List<Hex> hexes,
+            final Duration duration) {
         this.base = base;
+        this.calculator = calculator;
         this.duration = duration;
         this.hexes = List.copyOf(hexes);
         for (final var hex : this.hexes) {
@@ -146,54 +147,21 @@ final class HexedStateImpl implements HexedState {
     }
 
     private float getProgress0(final Hex hex, final Team team) {
-        return (this.progress
-                                .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new IntFloatMap(4))
-                                .get(team.id)
-                        / ITEM_REQUIREMENT)
+        return this.progress
+                        .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new IntFloatMap(4))
+                        .get(team.id)
                 * 100F;
     }
 
     public void updateProgress(final Hex hex) {
-        final var center = Vars.world.tile(hex.getTileX(), hex.getTileY());
-
-        if (center.block() instanceof CoreBlock) {
-            this.controllers.put(hex, center.team());
-        }
-
         final var progress = this.progress.get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new IntFloatMap(4));
         progress.clear();
-        Groups.unit
-                .intersect(
-                        hex.getX() - hex.getRadius(),
-                        hex.getY() - hex.getRadius(),
-                        hex.getDiameter(),
-                        hex.getDiameter())
-                .each(u -> {
-                    if (!u.isPlayer() && hex.contains(u.tileX(), u.tileY())) {
-                        progress.increment(u.team().id, u.health() / 10F);
-                    }
-                });
-
-        for (int cx = hex.getTileX() - hex.getTileRadius(); cx < hex.getTileX() + hex.getTileRadius(); cx++) {
-            for (int cy = hex.getTileY() - hex.getTileRadius(); cy < hex.getTileY() + hex.getTileRadius(); cy++) {
-                final var tile = Vars.world.tile(cx, cy);
-                if (tile != null
-                        && tile.synthetic()
-                        && hex.contains(tile.x, tile.y)
-                        && tile.block().requirements != null) {
-                    for (final var stack : tile.block().requirements) {
-                        progress.increment(tile.team().id, stack.amount * stack.item.cost);
-                    }
-                }
-            }
-        }
-
+        this.calculator.calculate(hex, progress);
         final var data = Vars.state.teams.getActive().max(t -> progress.get(t.team.id));
-        if (data != null && progress.get(data.team.id) >= ITEM_REQUIREMENT) {
+        if (data != null && progress.get(data.team.id) >= 1F) {
             this.controllers.put(hex, data.team);
-            return;
+        } else {
+            this.controllers.put(hex, null);
         }
-
-        this.controllers.put(hex, null);
     }
 }

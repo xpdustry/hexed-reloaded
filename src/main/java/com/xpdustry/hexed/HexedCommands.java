@@ -131,7 +131,7 @@ final class HexedCommands implements PluginListener {
         }
     }
 
-    @Command("hexed join")
+    @Command("join")
     @CommandDescription("Join the game.")
     public void onJoinCommand(final CommandSender sender) {
         if (sender.isServer()) {

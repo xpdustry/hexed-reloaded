@@ -18,6 +18,7 @@
  */
 package com.xpdustry.hexed.generation;
 
+import com.xpdustry.hexed.HexedCaptureProgress;
 import com.xpdustry.hexed.model.Hex;
 import java.time.Duration;
 import java.util.Collections;
@@ -31,6 +32,7 @@ public class SimpleHexedMapContext extends SimpleMapContext implements HexedMapC
     private List<Hex> hexes = Collections.emptyList();
     private Duration duration = DEFAULT_GAME_DURATION;
     private ImmutableSchematic schematic = DEFAULT_BASE_SCHEMATIC;
+    private HexedCaptureProgress calculator = HexedCaptureProgress.anuke();
 
     {
         final var rules = this.getRules();
@@ -88,5 +90,15 @@ public class SimpleHexedMapContext extends SimpleMapContext implements HexedMapC
     @Override
     public void setBaseSchematic(final ImmutableSchematic schematic) {
         this.schematic = schematic;
+    }
+
+    @Override
+    public HexedCaptureProgress getCaptureCalculator() {
+        return this.calculator;
+    }
+
+    @Override
+    public void setCaptureCalculator(final HexedCaptureProgress calculator) {
+        this.calculator = calculator;
     }
 }

@@ -75,7 +75,6 @@ public class AnukeHexedGenerator implements HexedMapGenerator {
         return "anuke";
     }
 
-    @SuppressWarnings("ExtractMethodRecommender")
     @Override
     public HexedMapContext generate() {
         final var context = new SimpleHexedMapContext();
