@@ -19,7 +19,7 @@
 package com.xpdustry.hexed;
 
 import arc.util.CommandHandler;
-import com.xpdustry.distributor.api.DistributorProvider;
+import com.xpdustry.distributor.api.Distributor;
 import com.xpdustry.distributor.api.command.CommandSender;
 import com.xpdustry.distributor.api.command.cloud.MindustryCommandManager;
 import com.xpdustry.distributor.api.plugin.MindustryPlugin;
@@ -63,11 +63,10 @@ final class HexedCommands implements PluginListener {
             return;
         }
 
-        final var generator =
-                DistributorProvider.get().getServiceManager().getProviders(HexedMapGenerator.class).stream()
-                        .map(ServiceProvider::getInstance)
-                        .filter(g -> g.getName().equals(name))
-                        .findFirst();
+        final var generator = Distributor.get().getServiceManager().getProviders(HexedMapGenerator.class).stream()
+                .map(ServiceProvider::getInstance)
+                .filter(g -> g.getName().equals(name))
+                .findFirst();
         if (generator.isEmpty()) {
             sender.error("Generator named " + name + " not found.");
             return;
@@ -122,7 +121,7 @@ final class HexedCommands implements PluginListener {
             return;
         }
         if (sender.getPlayer().team() != Team.derelict) {
-            DistributorProvider.get()
+            Distributor.get()
                     .getEventBus()
                     .post(new HexPlayerQuitEvent(
                             sender.getPlayer(), sender.getPlayer().team(), false));
@@ -139,7 +138,7 @@ final class HexedCommands implements PluginListener {
             return;
         }
         if (sender.getPlayer().team() == Team.derelict) {
-            DistributorProvider.get().getEventBus().post(new HexPlayerJoinEvent(sender.getPlayer(), false));
+            Distributor.get().getEventBus().post(new HexPlayerJoinEvent(sender.getPlayer(), false));
         } else {
             sender.error("You are already in the game.");
         }

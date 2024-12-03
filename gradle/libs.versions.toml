@@ -4,7 +4,7 @@
 java = "17"
 
 # utilities
-distributor = "4.0.0-rc.3"
+distributor = "4.0.1"
 cloud = "2.0.0"
 slf4md = "1.0.1"
 

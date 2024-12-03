@@ -21,7 +21,7 @@ package com.xpdustry.hexed;
 import arc.math.Mathf;
 import arc.util.Interval;
 import arc.util.Time;
-import com.xpdustry.distributor.api.DistributorProvider;
+import com.xpdustry.distributor.api.Distributor;
 import com.xpdustry.distributor.api.annotation.EventHandler;
 import com.xpdustry.distributor.api.collection.MindustryCollections;
 import com.xpdustry.distributor.api.plugin.PluginListener;
@@ -64,7 +64,7 @@ final class HexedLogic implements PluginListener {
 
     @EventHandler
     public void onPlayerJoin(final EventType.PlayerJoin event) {
-        DistributorProvider.get().getEventBus().post(new HexPlayerJoinEvent(event.player, true));
+        Distributor.get().getEventBus().post(new HexPlayerJoinEvent(event.player, true));
     }
 
     @EventHandler
@@ -99,7 +99,7 @@ final class HexedLogic implements PluginListener {
 
     @EventHandler
     public void onPlayerLeave(final EventType.PlayerLeave event) {
-        DistributorProvider.get().getEventBus().post(new HexPlayerQuitEvent(event.player, event.player.team(), false));
+        Distributor.get().getEventBus().post(new HexPlayerQuitEvent(event.player, event.player.team(), false));
     }
 
     @EventHandler
@@ -141,14 +141,14 @@ final class HexedLogic implements PluginListener {
                 if (oldController != newController && newController != null && newController != Team.derelict) {
                     final var player = Groups.player.find(p -> p.team() == newController);
                     if (player != null) {
-                        DistributorProvider.get().getEventBus().post(new HexCaptureEvent(player, hex));
+                        Distributor.get().getEventBus().post(new HexCaptureEvent(player, hex));
                     }
                 }
 
                 if (oldController != newController && oldController != null && oldController != Team.derelict) {
                     final var player = Groups.player.find(p -> p.team() == oldController);
                     if (player != null) {
-                        DistributorProvider.get().getEventBus().post(new HexLostEvent(player, hex));
+                        Distributor.get().getEventBus().post(new HexLostEvent(player, hex));
                     }
                 }
             }
@@ -158,7 +158,7 @@ final class HexedLogic implements PluginListener {
             for (final var player : Groups.player) {
                 if (player.team() != Team.derelict && player.team().cores().isEmpty()) {
                     final var oldTeam = player.team();
-                    DistributorProvider.get().getEventBus().post(new HexPlayerQuitEvent(player, oldTeam, true));
+                    Distributor.get().getEventBus().post(new HexPlayerQuitEvent(player, oldTeam, true));
                 }
 
                 if (player.team() == Team.derelict) {
@@ -183,7 +183,7 @@ final class HexedLogic implements PluginListener {
     private void killTeam(final Team team) {
         this.hexed.getHexedState0().setDying(team, true);
         team.data().destroyToDerelict();
-        DistributorProvider.get()
+        Distributor.get()
                 .getPluginScheduler()
                 .schedule(this.hexed)
                 .delay(8, MindustryTimeUnit.SECONDS)
@@ -199,7 +199,7 @@ final class HexedLogic implements PluginListener {
                 .filter(team -> team != Team.derelict)
                 .collect(maxList(Comparator.comparingInt(
                         team -> this.hexed.getHexedState().getControlled(team).size())));
-        final var bus = DistributorProvider.get().getEventBus();
+        final var bus = Distributor.get().getEventBus();
         bus.post(new GameOverEvent(winners.size() == 1 ? winners.get(0) : Team.derelict));
         bus.post(new HexedGameOverEvent(winners));
     }

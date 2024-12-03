@@ -18,7 +18,7 @@
  */
 package com.xpdustry.hexed;
 
-import com.xpdustry.distributor.api.DistributorProvider;
+import com.xpdustry.distributor.api.Distributor;
 import com.xpdustry.distributor.api.annotation.PluginAnnotationProcessor;
 import com.xpdustry.distributor.api.plugin.AbstractMindustryPlugin;
 import com.xpdustry.distributor.api.plugin.PluginListener;
@@ -71,9 +71,7 @@ public final class HexedPluginReloaded extends AbstractMindustryPlugin implement
 
     @Override
     public void onInit() {
-        DistributorProvider.get()
-                .getServiceManager()
-                .register(this, HexedMapGenerator.class, new AnukeHexedGenerator());
+        Distributor.get().getServiceManager().register(this, HexedMapGenerator.class, new AnukeHexedGenerator());
         this.addListener(new HexedLogic(this));
         this.addListener(new HexedRenderer(this));
         this.addListener(new HexedCommands(this));
