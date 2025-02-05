@@ -1,7 +1,8 @@
 /*
- * HexedReloaded, A reimplementation of the hexed gamemode from Anuke, with more features and better performances.
+ * HexedReloaded, a reimplementation of the hexed gamemode from Anuke,
+ * with more features and better performances.
  *
- * Copyright (C) 2024  Xpdustry
+ * Copyright (C) 2025  Xpdustry
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
