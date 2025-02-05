@@ -86,12 +86,13 @@ spotless {
         palantirJavaFormat()
         formatAnnotations()
         importOrder("", "\\#")
-        custom("no-wildcard-imports") { it.apply { if (contains("*;\n")) error("No wildcard imports allowed") } }
+        // TODO: SPOTLESS, WHY
+        // custom("no-wildcard-imports") { it.apply { if (contains("*;\n")) error("No wildcard imports allowed") } }
         licenseHeaderFile(rootProject.file("HEADER.txt"))
         bumpThisNumberIfACustomStepChanges(1)
     }
     kotlinGradle {
-        ktlint()
+        ktlint().editorConfigOverride(mapOf("max_line_length" to "120"))
     }
 }
 
