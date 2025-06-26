@@ -9,7 +9,7 @@ cloud = "2.0.0"
 slf4md = "1.0.1"
 
 # static analysis
-errorprone-gradle = "4.1.0"
+errorprone-gradle = "4.3.0"
 errorprone-core = "2.36.0"
 nullaway = "0.12.3"
 checker-qual = "3.49.0"
