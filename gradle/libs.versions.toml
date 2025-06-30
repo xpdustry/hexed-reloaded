@@ -12,7 +12,7 @@ slf4md = "1.0.4"
 errorprone-gradle = "4.3.0"
 errorprone-core = "2.39.0"
 nullaway = "0.12.7"
-checker-qual = "3.49.4"
+checker-qual = "3.49.5"
 
 # gradle
 toxopid = "4.1.2"
