@@ -28,6 +28,7 @@ import com.xpdustry.hexed.generation.HexedMapContext;
 import com.xpdustry.hexed.generation.HexedMapGenerator;
 import com.xpdustry.hexed.generation.MapGenerator;
 import com.xpdustry.hexed.generation.MapLoader;
+import java.util.Objects;
 import mindustry.Vars;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -39,11 +40,11 @@ public final class HexedPluginReloaded extends AbstractMindustryPlugin implement
 
     @Override
     public HexedState getHexedState() {
-        return this.state;
+        return Objects.requireNonNull(this.state);
     }
 
     HexedStateImpl getHexedState0() {
-        return this.state;
+        return Objects.requireNonNull(this.state);
     }
 
     @Override

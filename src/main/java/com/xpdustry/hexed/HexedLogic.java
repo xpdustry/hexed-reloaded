@@ -89,7 +89,9 @@ final class HexedLogic implements PluginListener {
             Call.infoMessage(
                     event.player().con(),
                     "There are currently no empty hex spaces available.\nAssigning into spectator mode.");
-            event.player().unit().kill();
+            if (event.player().unit() != null) {
+                event.player().unit().kill();
+            }
             event.player().team(Team.derelict);
         } else {
             final var hex = hexes.get(Mathf.random(0, hexes.size() - 1));
@@ -107,7 +109,9 @@ final class HexedLogic implements PluginListener {
     public void onPlayerQuit(final HexPlayerQuitEvent event) {
         if (this.hexed.isEnabled()) {
             this.killTeam(event.player().team());
-            event.player().unit().kill();
+            if (event.player().unit() != null) {
+                event.player().unit().kill();
+            }
             event.player().team(Team.derelict);
             event.player().clearUnit();
         }

@@ -28,6 +28,7 @@ import mindustry.content.Items;
 import mindustry.game.Gamemode;
 import mindustry.type.ItemStack;
 
+@SuppressWarnings("this-escape")
 public class SimpleHexedMapContext extends SimpleMapContext implements HexedMapContext {
 
     private List<Hex> hexes = Collections.emptyList();
@@ -36,6 +37,7 @@ public class SimpleHexedMapContext extends SimpleMapContext implements HexedMapC
     private HexedCaptureProgress calculator = HexedCaptureProgress.anuke();
 
     {
+        // TODO Use an "apply" rules instead of get
         final var rules = this.getRules();
         Gamemode.pvp.apply(rules);
         rules.pvp = true;
