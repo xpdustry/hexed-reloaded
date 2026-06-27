@@ -1,7 +1,10 @@
+import com.xpdustry.toxopid.Toxopid
 import com.xpdustry.toxopid.extension.anukeXpdustry
+import com.xpdustry.toxopid.extension.configureDesktop
 import com.xpdustry.toxopid.spec.ModMetadata
 import com.xpdustry.toxopid.spec.ModPlatform
 import com.xpdustry.toxopid.task.GithubAssetDownload
+import com.xpdustry.toxopid.task.MindustryExec
 import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
 
@@ -152,6 +155,12 @@ val downloadDistributorCommon by tasks.registering(GithubAssetDownload::class) {
 
 tasks.runMindustryServer {
     mods.from(downloadSlf4md, downloadDistributorCommon)
+}
+
+tasks.register<MindustryExec>("runMindustryDesktop2") {
+    group = Toxopid.TASK_GROUP_NAME
+    configureDesktop()
+    classpath(tasks.downloadMindustryDesktop)
 }
 
 tasks.build {

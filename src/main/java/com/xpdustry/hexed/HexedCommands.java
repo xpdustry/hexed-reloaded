@@ -139,7 +139,7 @@ final class HexedCommands implements PluginListener {
             return;
         }
         if (sender.getPlayer().team() == Team.derelict) {
-            Distributor.get().getEventBus().post(new HexPlayerJoinEvent(sender.getPlayer(), false));
+            Distributor.get().getEventBus().post(new HexPlayerJoinEvent(sender.getPlayer()));
         } else {
             sender.error("You are already in the game.");
         }

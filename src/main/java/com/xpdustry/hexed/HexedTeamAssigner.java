@@ -52,9 +52,7 @@ final class HexedTeamAssigner implements TeamAssigner {
 
         if (this.hexed.isEnabled()) {
             for (final var team : this.teams) {
-                if (!team.active()
-                        && !used.contains(team)
-                        && !this.hexed.getHexedState().isDying(team)) {
+                if (!used.contains(team) && this.hexed.getHexedState().isAvailable(team)) {
                     Collections.shuffle(this.teams);
                     return team;
                 }

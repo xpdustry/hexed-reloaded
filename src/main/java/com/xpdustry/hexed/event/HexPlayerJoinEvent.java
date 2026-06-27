@@ -21,4 +21,4 @@ package com.xpdustry.hexed.event;
 
 import mindustry.gen.Player;
 
-public record HexPlayerJoinEvent(Player player, boolean virtual) {}
+public record HexPlayerJoinEvent(Player player) {}

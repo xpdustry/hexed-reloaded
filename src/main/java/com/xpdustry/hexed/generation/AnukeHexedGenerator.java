@@ -116,7 +116,7 @@ public class AnukeHexedGenerator implements HexedMapGenerator {
             for (int y = 0; y < HEIGHT / (h / 2) - 2; y++) {
                 final int cx = (int) (x * SPACING * 1.5 + (y % 2) * SPACING * 3.0 / 4) + SPACING / 2;
                 final int cy = (int) (y * h / 2) + SPACING / 2;
-                hexes.add(Hex.hexagon(y + (int) (x * (HEIGHT / (h / 2) - 2)), cx, cy, DIAMETER));
+                hexes.add(Hex.hexagon(hexes.size(), cx, cy, DIAMETER));
             }
         }
         context.setHexes(hexes);
@@ -167,7 +167,7 @@ public class AnukeHexedGenerator implements HexedMapGenerator {
             } else if (tile.getFloor() == Blocks.moss) {
                 tile.setBlock(Blocks.sporeCluster);
             } else if (tile.getFloor() == Blocks.ice) {
-                tile.setBlock(Blocks.ice);
+                tile.setBlock(Blocks.snowBoulder);
             } else if (tile.getFloor() == Blocks.snow) {
                 tile.setBlock(Blocks.snowBoulder);
             }

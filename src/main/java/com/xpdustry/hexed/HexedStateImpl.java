@@ -28,19 +28,19 @@ import com.xpdustry.hexed.generation.ImmutableSchematic;
 import com.xpdustry.hexed.model.Hex;
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import mindustry.Vars;
 import mindustry.game.Team;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 final class HexedStateImpl implements HexedState {
 
+    private static final float SPAWN_DELAY_SECONDS = 60F * 4F;
+
+    private final IntFloatMap unavailableTeams = new IntFloatMap();
     private final Map<Hex, Team> controllers = new HashMap<>();
     private final List<Hex> hexes;
-    private final Set<Team> dying = new HashSet<>();
     private final IntMap<Hex> positions = new IntMap<>();
     private final IntMap<Timekeeper> spawnTimers = new IntMap<>();
     private final IntMap<IntFloatMap> progress = new IntMap<>();
@@ -89,27 +89,26 @@ final class HexedStateImpl implements HexedState {
     public boolean isAvailable(final Hex hex) {
         return (this.getController(hex) == null)
                 && this.spawnTimers
-                        .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> Timekeeper.ofTicks(6 * 60))
+                        .get(
+                                Point2.pack(hex.getTileX(), hex.getTileY()),
+                                () -> Timekeeper.ofSeconds(SPAWN_DELAY_SECONDS))
                         .get();
+    }
+
+    @Override
+    public boolean isAvailable(final Team team) {
+        return team != Team.derelict && !team.active() && Time.time > this.unavailableTeams.get(team.id, 0F);
+    }
+
+    @Override
+    public void markUnavailableFor(final Team team, final int seconds) {
+        this.unavailableTeams.put(team.id, Time.time + (Time.toSeconds * seconds));
     }
 
     public void resetSpawnTimer(final Hex hex) {
         this.spawnTimers
-                .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> Timekeeper.ofTicks(6 * 60))
+                .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> Timekeeper.ofSeconds(SPAWN_DELAY_SECONDS))
                 .reset();
-    }
-
-    @Override
-    public boolean isDying(final Team team) {
-        return this.dying.contains(team);
-    }
-
-    public void setDying(final Team team, final boolean dying) {
-        if (dying) {
-            this.dying.add(team);
-        } else {
-            this.dying.remove(team);
-        }
     }
 
     @Override

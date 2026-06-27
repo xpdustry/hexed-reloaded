@@ -40,7 +40,9 @@ public interface HexedState {
 
     boolean isAvailable(final Hex hex);
 
-    boolean isDying(final Team team);
+    boolean isAvailable(final Team team);
+
+    void markUnavailableFor(final Team team, final int seconds);
 
     ImmutableSchematic getBaseSchematic();
 

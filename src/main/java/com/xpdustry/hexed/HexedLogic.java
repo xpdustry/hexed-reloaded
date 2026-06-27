@@ -26,7 +26,6 @@ import com.xpdustry.distributor.api.Distributor;
 import com.xpdustry.distributor.api.annotation.EventHandler;
 import com.xpdustry.distributor.api.collection.MindustryCollections;
 import com.xpdustry.distributor.api.plugin.PluginListener;
-import com.xpdustry.distributor.api.scheduler.MindustryTimeUnit;
 import com.xpdustry.hexed.event.HexCaptureEvent;
 import com.xpdustry.hexed.event.HexLostEvent;
 import com.xpdustry.hexed.event.HexPlayerJoinEvent;
@@ -65,7 +64,7 @@ final class HexedLogic implements PluginListener {
 
     @EventHandler
     public void onPlayerJoin(final EventType.PlayerJoin event) {
-        Distributor.get().getEventBus().post(new HexPlayerJoinEvent(event.player, true));
+        Distributor.get().getEventBus().post(new HexPlayerJoinEvent(event.player));
     }
 
     @EventHandler
@@ -73,7 +72,7 @@ final class HexedLogic implements PluginListener {
         if (!this.hexed.isEnabled()) {
             return;
         }
-        if (event.virtual()) {
+        if (event.player().team() == Team.derelict) {
             event.player().team(Vars.netServer.assignTeam(event.player()));
         }
         if (event.player().team() == Team.derelict) {
@@ -108,7 +107,10 @@ final class HexedLogic implements PluginListener {
     @EventHandler
     public void onPlayerQuit(final HexPlayerQuitEvent event) {
         if (this.hexed.isEnabled()) {
-            this.killTeam(event.player().team());
+            if (event.team() != Team.derelict) {
+                event.team().data().destroyToDerelict();
+                this.hexed.getHexedState().markUnavailableFor(event.team(), 10);
+            }
             if (event.player().unit() != null) {
                 event.player().unit().kill();
             }
@@ -182,17 +184,6 @@ final class HexedLogic implements PluginListener {
                 > this.hexed.getHexedState().getDuration().toMillis()) {
             this.endGame();
         }
-    }
-
-    @SuppressWarnings("FutureReturnValueIgnored")
-    private void killTeam(final Team team) {
-        this.hexed.getHexedState0().setDying(team, true);
-        team.data().destroyToDerelict();
-        Distributor.get()
-                .getPluginScheduler()
-                .schedule(this.hexed)
-                .delay(8, MindustryTimeUnit.SECONDS)
-                .execute(() -> this.hexed.getHexedState0().setDying(team, false));
     }
 
     private void endGame() {
