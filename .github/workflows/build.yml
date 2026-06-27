@@ -12,6 +12,9 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.event.number || github.ref }}"
   cancel-in-progress: true
 
+env:
+  ORG_GRADLE_PROJECT_is_release: ${{ github.event_name == 'release' }}
+
 jobs:
   build:
     # Only run on PRs if the source branch is on someone else's repo
