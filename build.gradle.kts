@@ -9,13 +9,13 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
-    alias(libs.plugins.spotless)
-    alias(libs.plugins.indra.common)
-    alias(libs.plugins.indra.git)
-    alias(libs.plugins.indra.publishing)
-    alias(libs.plugins.shadow)
-    alias(libs.plugins.toxopid)
-    alias(libs.plugins.errorprone.gradle)
+    id("com.diffplug.spotless") version "8.7.0"
+    id("net.kyori.indra") version "4.0.0"
+    id("net.kyori.indra.git") version "4.0.0"
+    id("net.kyori.indra.publishing") version "4.0.0"
+    id("com.gradleup.shadow") version "9.4.3"
+    id("com.xpdustry.toxopid") version "4.2.0"
+    id("net.ltgt.errorprone") version "5.1.0"
 }
 
 val metadata = ModMetadata.fromJson(rootProject.file("plugin.json"))
@@ -42,19 +42,19 @@ dependencies {
     compileOnly(toxopid.dependencies.mindustryCore)
     compileOnly(toxopid.dependencies.arcCore)
 
-    implementation(libs.distributor.cloud)
-    implementation(libs.cloud.core)
-    implementation(libs.cloud.annotations)
-    compileOnly(libs.distributor.api)
-    compileOnly(libs.jspecify)
-    annotationProcessor(libs.nullaway)
-    errorprone(libs.errorprone.core)
+    implementation("com.xpdustry:distributor-command-cloud:4.2.0")
+    implementation("org.incendo:cloud-core:2.0.0")
+    implementation("org.incendo:cloud-annotations:2.0.0")
+    compileOnly("com.xpdustry:distributor-common-api:4.2.0")
+    compileOnly("org.jspecify:jspecify:1.0.0")
+    annotationProcessor("com.uber.nullaway:nullaway:0.13.7")
+    errorprone("com.google.errorprone:error_prone_core:2.50.0")
 }
 
 indra {
     javaVersions {
-        target(libs.versions.java.get().toInt())
-        minimumToolchain(libs.versions.java.get().toInt())
+        target(17)
+        minimumToolchain(17)
     }
 
     publishSnapshotsTo("xpdustry", "https://maven.xpdustry.com/snapshots")
@@ -143,14 +143,14 @@ val downloadSlf4md by tasks.registering(GithubAssetDownload::class) {
     owner = "xpdustry"
     repo = "slf4md"
     asset = "slf4md-simple.jar"
-    version = "v${libs.versions.slf4md.get()}"
+    version = "v1.0.4"
 }
 
 val downloadDistributorCommon by tasks.registering(GithubAssetDownload::class) {
     owner = "xpdustry"
     repo = "distributor"
     asset = "distributor-common.jar"
-    version = "v${libs.versions.distributor.get()}"
+    version = "v4.2.0"
 }
 
 tasks.runMindustryServer {
