@@ -9,16 +9,16 @@ cloud = "2.0.0"
 slf4md = "1.0.4"
 
 # static analysis
-errorprone-gradle = "4.4.0"
+errorprone-gradle = "5.1.0"
 errorprone-core = "2.50.0"
 nullaway = "0.12.7"
 checker-qual = "3.55.1"
 
 # gradle
 toxopid = "4.2.0"
-indra = "3.2.0"
-spotless = "7.2.1"
-shadow = "8.3.11"
+indra = "4.0.0"
+spotless = "8.7.0"
+shadow = "9.4.3"
 
 [libraries]
 
