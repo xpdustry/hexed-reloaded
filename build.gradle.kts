@@ -82,9 +82,10 @@ indra {
 }
 
 signing {
-    val signingKey: String? by project
-    val signingPassword: String? by project
-    useInMemoryPgpKeys(signingKey, signingPassword)
+    useInMemoryPgpKeys(
+        project.findProperty("signingKey")?.toString(),
+        project.findProperty("signingPassword")?.toString(),
+    )
 }
 
 spotless {
@@ -102,7 +103,7 @@ spotless {
     }
 }
 
-val generateMetadataFile by tasks.registering {
+val generateMetadataFile = tasks.register("generateMetadataFile") {
     inputs.property("metadata", metadata)
     val output = temporaryDir.resolve("plugin.json")
     outputs.file(output)
@@ -139,14 +140,14 @@ tasks.withType<JavaCompile> {
     }
 }
 
-val downloadSlf4md by tasks.registering(GithubAssetDownload::class) {
+val downloadSlf4md = tasks.register<GithubAssetDownload>("downloadSlf4md") {
     owner = "xpdustry"
     repo = "slf4md"
     asset = "slf4md-simple.jar"
     version = "v1.0.4"
 }
 
-val downloadDistributorCommon by tasks.registering(GithubAssetDownload::class) {
+val downloadDistributorCommon = tasks.register<GithubAssetDownload>("downloadDistributorCommon") {
     owner = "xpdustry"
     repo = "distributor"
     asset = "distributor-common.jar"
