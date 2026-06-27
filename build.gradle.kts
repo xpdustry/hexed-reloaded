@@ -93,10 +93,9 @@ spotless {
         palantirJavaFormat()
         formatAnnotations()
         importOrder("", "\\#")
-        // TODO: SPOTLESS, WHY
-        // custom("no-wildcard-imports") { it.apply { if (contains("*;\n")) error("No wildcard imports allowed") } }
-        licenseHeaderFile(rootProject.file("HEADER.txt"))
-        bumpThisNumberIfACustomStepChanges(1)
+        forbidWildcardImports()
+        forbidModuleImports()
+        licenseHeader("// SPDX-License-Identifier: GPL-3.0-only")
     }
     kotlinGradle {
         ktlint().editorConfigOverride(mapOf("max_line_length" to "120"))
