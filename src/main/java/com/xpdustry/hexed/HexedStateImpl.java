@@ -71,7 +71,7 @@ final class HexedStateImpl implements HexedState {
     @Override
     public List<Hex> getControlled(final Team team) {
         return this.hexes.stream()
-                .filter(hex -> this.getController(hex) == team)
+                .filter(hex -> team.equals(this.getController(hex)))
                 .toList();
     }
 
@@ -97,7 +97,7 @@ final class HexedStateImpl implements HexedState {
 
     @Override
     public boolean isAvailable(final Team team) {
-        return team != Team.derelict && !team.active() && Time.time > this.unavailableTeams.get(team.id, 0F);
+        return !team.equals(Team.derelict) && !team.active() && Time.time > this.unavailableTeams.get(team.id, 0F);
     }
 
     @Override
@@ -140,7 +140,7 @@ final class HexedStateImpl implements HexedState {
     public float getProgress(final Hex hex, final Team team) {
         final var progress = this.getProgress0(hex, team);
         final var controller = this.getController(hex);
-        if (controller != null && controller != team) {
+        if (controller != null && !controller.equals(team)) {
             return (progress / this.getProgress0(hex, controller)) * 100F;
         }
         return progress;

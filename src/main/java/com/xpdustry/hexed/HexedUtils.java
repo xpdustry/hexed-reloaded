@@ -44,7 +44,8 @@ final class HexedUtils {
             builder.append("\n[yellow]")
                     .append(i + 1)
                     .append(".[white] ")
-                    .append(Optional.ofNullable(Groups.player.find(player -> player.team() == entry.getKey()))
+                    .append(Optional.ofNullable(
+                                    Groups.player.find(player -> player.team().equals(entry.getKey())))
                             .map(Player::coloredName)
                             .orElse("Unknown"))
                     .append(" [orange]>[white] ")

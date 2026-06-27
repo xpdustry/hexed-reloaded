@@ -72,10 +72,10 @@ final class HexedLogic implements PluginListener {
         if (!this.hexed.isEnabled()) {
             return;
         }
-        if (event.player().team() == Team.derelict) {
+        if (event.player().team().equals(Team.derelict)) {
             event.player().team(Vars.netServer.assignTeam(event.player()));
         }
-        if (event.player().team() == Team.derelict) {
+        if (event.player().team().equals(Team.derelict)) {
             return;
         }
 
@@ -107,7 +107,7 @@ final class HexedLogic implements PluginListener {
     @EventHandler
     public void onPlayerQuit(final HexPlayerQuitEvent event) {
         if (this.hexed.isEnabled()) {
-            if (event.team() != Team.derelict) {
+            if (!event.team().equals(Team.derelict)) {
                 event.team().data().destroyToDerelict();
                 this.hexed.getHexedState().markUnavailableFor(event.team(), 10);
             }
@@ -145,15 +145,19 @@ final class HexedLogic implements PluginListener {
                 this.hexed.getHexedState0().updateProgress(hex);
                 final var newController = this.hexed.getHexedState().getController(hex);
 
-                if (oldController != newController && newController != null && newController != Team.derelict) {
-                    final var player = Groups.player.find(p -> p.team() == newController);
+                if (newController != null
+                        && !newController.equals(oldController)
+                        && !newController.equals(Team.derelict)) {
+                    final var player = Groups.player.find(p -> p.team().equals(newController));
                     if (player != null) {
                         Distributor.get().getEventBus().post(new HexCaptureEvent(player, hex));
                     }
                 }
 
-                if (oldController != newController && oldController != null && oldController != Team.derelict) {
-                    final var player = Groups.player.find(p -> p.team() == oldController);
+                if (oldController != null
+                        && !oldController.equals(newController)
+                        && !oldController.equals(Team.derelict)) {
+                    final var player = Groups.player.find(p -> p.team().equals(oldController));
                     if (player != null) {
                         Distributor.get().getEventBus().post(new HexLostEvent(player, hex));
                     }
@@ -163,12 +167,13 @@ final class HexedLogic implements PluginListener {
 
         if (this.interval.get(PLAYER_TIMER, 60)) {
             for (final var player : Groups.player) {
-                if (player.team() != Team.derelict && player.team().cores().isEmpty()) {
+                if (!player.team().equals(Team.derelict)
+                        && player.team().cores().isEmpty()) {
                     final var oldTeam = player.team();
                     Distributor.get().getEventBus().post(new HexPlayerQuitEvent(player, oldTeam, true));
                 }
 
-                if (player.team() == Team.derelict) {
+                if (player.team().equals(Team.derelict)) {
                     player.clearUnit();
                 }
 
@@ -192,7 +197,7 @@ final class HexedLogic implements PluginListener {
         }
         final var winners = MindustryCollections.immutableList(Vars.state.teams.getActive()).stream()
                 .map(data -> data.team)
-                .filter(team -> team != Team.derelict)
+                .filter(team -> !team.equals(Team.derelict))
                 .collect(maxList(Comparator.comparingInt(
                         team -> this.hexed.getHexedState().getControlled(team).size())));
         final var bus = Distributor.get().getEventBus();
@@ -215,7 +220,7 @@ final class HexedLogic implements PluginListener {
                 return;
             }
 
-            if (tile.block() != Blocks.air) {
+            if (!tile.block().equals(Blocks.air)) {
                 tile.removeNet();
             }
 

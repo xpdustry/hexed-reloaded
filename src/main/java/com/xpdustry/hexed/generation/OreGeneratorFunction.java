@@ -127,8 +127,10 @@ public final class OreGeneratorFunction extends GeneratorFunction {
         final float noise = Simplex.noise2d(
                 this.getSeed(), this.octaves, this.falloff, 1f / this.scale, (float) x + 10, y + x * this.tilt + 10);
         if (noise > this.threshold
-                && tile.getOverlay() != Blocks.spawn
-                && (this.target == Blocks.air || tile.getFloor() == this.target || tile.getOverlay() == this.target)
+                && !tile.getOverlay().equals(Blocks.spawn)
+                && (this.target.equals(Blocks.air)
+                        || tile.getFloor().equals(this.target)
+                        || tile.getOverlay().equals(this.target))
                 && tile.getFloor().hasSurface()) {
             tile.setOverlay(this.ore);
         }

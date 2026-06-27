@@ -101,7 +101,7 @@ final class HexedRenderer implements PluginListener {
             Call.infoMessage("No one won the game, too bad...");
         } else if (event.winners().size() == 1) {
             final var winner =
-                    Groups.player.find(p -> p.team() == event.winners().get(0));
+                    Groups.player.find(p -> p.team().equals(event.winners().get(0)));
             if (winner != null) {
                 Call.infoMessage(winner.coloredName() + " [accent]won the game with [white] "
                         + this.hexed
@@ -153,7 +153,7 @@ final class HexedRenderer implements PluginListener {
                 }
             }
 
-            if (hex == null || player.team() == Team.derelict) {
+            if (hex == null || player.team().equals(Team.derelict)) {
                 Call.hideHudText(player.con());
             } else {
                 final var builder = new StringBuilder();
@@ -161,7 +161,7 @@ final class HexedRenderer implements PluginListener {
                 final var team = this.hexed.getHexedState().getController(hex);
                 if (team != null) {
                     builder.append("\n[#").append(team.color).append("]Controlled");
-                    final var controller = Groups.player.find(p -> p.team() == team);
+                    final var controller = Groups.player.find(p -> p.team().equals(team));
                     if (controller == null) {
                         // this.hexed.getLogger().warn("Team {} has no player.", team.name);
                         continue;
@@ -170,7 +170,7 @@ final class HexedRenderer implements PluginListener {
                 } else {
                     builder.append("\n[lightgray][[empty]");
                 }
-                if (team != player.team() && this.hexed.getHexedState().getProgress(hex, player.team()) > 0) {
+                if (!player.team().equals(team) && this.hexed.getHexedState().getProgress(hex, player.team()) > 0) {
                     builder.append("\n[lightgray]Capture progress: [accent]")
                             .append(Strings.fixed(this.hexed.getHexedState().getProgress(hex, player.team()), 1))
                             .append("%");

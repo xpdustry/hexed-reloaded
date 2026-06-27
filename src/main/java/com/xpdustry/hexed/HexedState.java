@@ -60,7 +60,7 @@ public interface HexedState {
     default Map<Team, Integer> getLeaderboard() {
         return this.getHexes().stream()
                 .map(this::getController)
-                .filter(team -> team != null && team != Team.derelict)
+                .filter(team -> team != null && !team.equals(Team.derelict))
                 .collect(Collectors.toMap(team -> team, team -> 1, Integer::sum));
     }
 }

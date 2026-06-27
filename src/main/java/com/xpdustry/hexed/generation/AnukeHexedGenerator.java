@@ -155,20 +155,20 @@ public class AnukeHexedGenerator implements HexedMapGenerator {
         // Add some boulders :)
 
         context.forEachTile((x, y, tile) -> {
-            if (!Mathf.chance(0.03) || tile.getBlock() != Blocks.air) return;
-            if (tile.getFloor() == Blocks.sand) {
+            if (!Mathf.chance(0.03) || !tile.getBlock().equals(Blocks.air)) return;
+            if (tile.getFloor().equals(Blocks.sand)) {
                 tile.setBlock(Blocks.sandBoulder);
-            } else if (tile.getFloor() == Blocks.stone) {
+            } else if (tile.getFloor().equals(Blocks.stone)) {
                 tile.setBlock(Blocks.boulder);
-            } else if (tile.getFloor() == Blocks.shale) {
+            } else if (tile.getFloor().equals(Blocks.shale)) {
                 tile.setBlock(Blocks.shaleBoulder);
-            } else if (tile.getFloor() == Blocks.darksand) {
+            } else if (tile.getFloor().equals(Blocks.darksand)) {
                 tile.setBlock(Blocks.boulder);
-            } else if (tile.getFloor() == Blocks.moss) {
+            } else if (tile.getFloor().equals(Blocks.moss)) {
                 tile.setBlock(Blocks.sporeCluster);
-            } else if (tile.getFloor() == Blocks.ice) {
+            } else if (tile.getFloor().equals(Blocks.ice)) {
                 tile.setBlock(Blocks.snowBoulder);
-            } else if (tile.getFloor() == Blocks.snow) {
+            } else if (tile.getFloor().equals(Blocks.snow)) {
                 tile.setBlock(Blocks.snowBoulder);
             }
         });

@@ -97,7 +97,7 @@ final class HexedCommands implements PluginListener {
             }
             player = sender.getPlayer();
         }
-        if (player.team() == Team.derelict) {
+        if (player.team().equals(Team.derelict)) {
             sender.error(player.coloredName() + " [white]is not in a team!");
             return;
         }
@@ -121,7 +121,7 @@ final class HexedCommands implements PluginListener {
             sender.error("You can't do that.");
             return;
         }
-        if (sender.getPlayer().team() != Team.derelict) {
+        if (!sender.getPlayer().team().equals(Team.derelict)) {
             Distributor.get()
                     .getEventBus()
                     .post(new HexPlayerQuitEvent(
@@ -138,7 +138,7 @@ final class HexedCommands implements PluginListener {
             sender.error("You can't do that.");
             return;
         }
-        if (sender.getPlayer().team() == Team.derelict) {
+        if (sender.getPlayer().team().equals(Team.derelict)) {
             Distributor.get().getEventBus().post(new HexPlayerJoinEvent(sender.getPlayer()));
         } else {
             sender.error("You are already in the game.");

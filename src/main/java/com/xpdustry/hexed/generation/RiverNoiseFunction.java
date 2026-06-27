@@ -119,17 +119,21 @@ public final class RiverNoiseFunction extends GeneratorFunction {
                 1f / this.scale);
 
         if (noise >= this.threshold1
-                && (this.target == Blocks.air || tile.getFloor() == this.target || tile.getBlock() == this.target)) {
+                && (this.target.equals(Blocks.air)
+                        || tile.getFloor().equals(this.target)
+                        || tile.getBlock().equals(this.target))) {
 
-            if (this.floor1 != Blocks.air) {
+            if (!this.floor1.equals(Blocks.air)) {
                 tile.setFloor(this.floor1);
             }
 
-            if (tile.getBlock().solid && this.block != Blocks.air && tile.getBlock() != Blocks.air) {
+            if (tile.getBlock().solid
+                    && !this.block.equals(Blocks.air)
+                    && !tile.getBlock().equals(Blocks.air)) {
                 tile.setBlock(this.block);
             }
 
-            if (noise >= this.threshold2 && this.floor2 != Blocks.air) {
+            if (noise >= this.threshold2 && !this.floor2.equals(Blocks.air)) {
                 tile.setFloor(this.floor2);
             }
         }
