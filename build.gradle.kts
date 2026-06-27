@@ -46,7 +46,7 @@ dependencies {
     implementation(libs.cloud.core)
     implementation(libs.cloud.annotations)
     compileOnly(libs.distributor.api)
-    compileOnly(libs.checker.qual)
+    compileOnly(libs.jspecify)
     annotationProcessor(libs.nullaway)
     errorprone(libs.errorprone.core)
 }
@@ -133,8 +133,8 @@ tasks.withType<JavaCompile> {
         disable("MissingSummary", "InlineMeSuggester")
         if (!name.contains("test", ignoreCase = true)) {
             check("NullAway", CheckSeverity.ERROR)
-            option("NullAway:AnnotatedPackages", "com.xpdustry.hexed")
-            option("NullAway:TreatGeneratedAsUnannotated", true)
+            option("NullAway:OnlyNullMarked")
+            option("NullAway:JSpecifyMode", "true")
         }
     }
 }

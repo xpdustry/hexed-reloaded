@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import mindustry.Vars;
 import mindustry.game.Team;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 final class HexedStateImpl implements HexedState {
 

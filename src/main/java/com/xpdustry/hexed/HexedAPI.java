@@ -21,12 +21,13 @@ package com.xpdustry.hexed;
 
 import com.xpdustry.hexed.generation.HexedMapContext;
 import com.xpdustry.hexed.generation.MapGenerator;
+import java.util.Objects;
 import mindustry.Vars;
 
 public interface HexedAPI {
 
     static HexedAPI get() {
-        return (HexedAPI) Vars.mods.getMod(HexedPluginReloaded.class).main;
+        return (HexedAPI) Objects.requireNonNull(Vars.mods.getMod(HexedPluginReloaded.class)).main;
     }
 
     HexedState getHexedState();

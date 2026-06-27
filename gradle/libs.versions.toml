@@ -12,7 +12,7 @@ slf4md = "1.0.4"
 errorprone-gradle = "5.1.0"
 errorprone-core = "2.50.0"
 nullaway = "0.13.7"
-checker-qual = "4.2.0"
+jspecify = "1.0.0"
 
 # gradle
 toxopid = "4.2.0"
@@ -31,7 +31,7 @@ cloud-annotations = { module = "org.incendo:cloud-annotations", version.ref = "c
 # static analysis
 errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone-core" }
 nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
-checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checker-qual" }
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 
 [plugins]
 indra-common = { id = "net.kyori.indra", version.ref = "indra" }

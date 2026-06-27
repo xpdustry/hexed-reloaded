@@ -27,7 +27,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import mindustry.game.Schematic;
 import mindustry.world.Block;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class ImmutableSchematic {
 

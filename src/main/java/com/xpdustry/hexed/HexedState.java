@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import mindustry.game.Team;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface HexedState {
 
@@ -56,6 +56,7 @@ public interface HexedState {
 
     void incrementCounter(final float delta);
 
+    @SuppressWarnings("NullableProblems") // "team != null && team != Team.derelict" is confusing idea...
     default Map<Team, Integer> getLeaderboard() {
         return this.getHexes().stream()
                 .map(this::getController)

@@ -23,6 +23,7 @@ import arc.files.Fi;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.function.Consumer;
 import mindustry.Vars;
 import mindustry.core.GameState.State;
@@ -79,7 +80,7 @@ public final class MapLoader implements Closeable {
         Vars.world.tiles = new Tiles(context.getWidth(), context.getHeight());
         Vars.world.tiles.fill();
         context.forEachTile((x, y, tile) -> {
-            final var original = Vars.world.tiles.get(x, y);
+            final var original = Objects.requireNonNull(Vars.world.tiles.get(x, y));
             original.setFloor(tile.getFloor());
             original.setOverlay(tile.getOverlay());
             original.setBlock(tile.getBlock());

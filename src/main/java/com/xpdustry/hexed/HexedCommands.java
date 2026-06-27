@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 import mindustry.Vars;
 import mindustry.game.Team;
 import mindustry.gen.Player;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.incendo.cloud.SenderMapper;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.annotations.Argument;
@@ -44,6 +43,7 @@ import org.incendo.cloud.annotations.Default;
 import org.incendo.cloud.annotations.Permission;
 import org.incendo.cloud.annotations.ProxiedBy;
 import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.jspecify.annotations.Nullable;
 
 @Command("hexed")
 final class HexedCommands implements PluginListener {

@@ -26,7 +26,7 @@ import mindustry.type.Liquid;
 import mindustry.type.UnitType;
 import mindustry.world.Block;
 import mindustry.world.blocks.environment.Floor;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class MapTile implements Cloneable {
 

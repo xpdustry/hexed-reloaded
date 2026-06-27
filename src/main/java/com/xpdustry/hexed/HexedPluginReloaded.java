@@ -30,13 +30,13 @@ import com.xpdustry.hexed.generation.MapGenerator;
 import com.xpdustry.hexed.generation.MapLoader;
 import java.util.Objects;
 import mindustry.Vars;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public final class HexedPluginReloaded extends AbstractMindustryPlugin implements HexedAPI {
 
     private final PluginAnnotationProcessor<?> processor = PluginAnnotationProcessor.events(this);
-    private @MonotonicNonNull HexedStateImpl state = null;
+    private @Nullable HexedStateImpl state = null;
 
     @Override
     public HexedState getHexedState() {
