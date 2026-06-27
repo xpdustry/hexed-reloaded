@@ -86,10 +86,10 @@ final class HexedRenderer implements PluginListener {
             for (final var hex : this.hexed.getHexedState().getHexes()) {
                 final var label = WorldLabel.create();
                 label.set(hex.getX(), hex.getY() + (Vars.tilesize / 2F));
-                label.text("#" + hex.getIdentifier());
-                label.flags(WorldLabel.flagOutline);
-                label.z(Layer.flyingUnitLow);
-                label.fontSize(3.5F);
+                label.text = "#" + hex.getIdentifier();
+                label.flags = WorldLabel.flagOutline;
+                label.z = Layer.flyingUnitLow;
+                label.fontSize = 3.5F;
                 label.add();
             }
         }

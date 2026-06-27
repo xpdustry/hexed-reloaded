@@ -89,13 +89,13 @@ final class HexedStateImpl implements HexedState {
     public boolean isAvailable(final Hex hex) {
         return (this.getController(hex) == null)
                 && this.spawnTimers
-                        .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new Timekeeper(6 * 60))
+                        .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> Timekeeper.ofTicks(6 * 60))
                         .get();
     }
 
     public void resetSpawnTimer(final Hex hex) {
         this.spawnTimers
-                .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> new Timekeeper(6 * 60))
+                .get(Point2.pack(hex.getTileX(), hex.getTileY()), () -> Timekeeper.ofTicks(6 * 60))
                 .reset();
     }
 

@@ -36,6 +36,9 @@ repositories {
 }
 
 dependencies {
+    compileOnly(toxopid.dependencies.mindustryCore)
+    compileOnly(toxopid.dependencies.arcCore)
+
     implementation(libs.distributor.cloud)
     implementation(libs.cloud.core)
     implementation(libs.cloud.annotations)
@@ -149,4 +152,8 @@ val downloadDistributorCommon by tasks.registering(GithubAssetDownload::class) {
 
 tasks.runMindustryServer {
     mods.from(downloadSlf4md, downloadDistributorCommon)
+}
+
+tasks.build {
+    dependsOn(tasks.shadowJar)
 }

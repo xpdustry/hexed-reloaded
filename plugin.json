@@ -8,6 +8,6 @@
   "java": true,
   "hidden": true,
   "main": "com.xpdustry.hexed.HexedPluginReloaded",
-  "minGameVersion": "149",
+  "minGameVersion": "158",
   "dependencies": [ "distributor-common" ]
 }
