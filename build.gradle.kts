@@ -53,8 +53,8 @@ dependencies {
 
 indra {
     javaVersions {
-        target(17)
-        minimumToolchain(17)
+        target(25)
+        minimumToolchain(25)
     }
 
     publishSnapshotsTo("xpdustry", "https://maven.xpdustry.com/snapshots")

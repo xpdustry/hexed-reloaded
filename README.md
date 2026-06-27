@@ -14,9 +14,9 @@ With the addition of a proper API for interacting with the hex game and an exper
 
 This plugin requires :
 
-- Java 17 or above.
+- Java 25 or above.
 
-- Mindustry v146 or above.
+- Mindustry v158 or above.
 
 - [Distributor](https://github.com/xpdustry/distributor) v4.0.0.
 
