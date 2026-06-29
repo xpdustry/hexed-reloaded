@@ -16,9 +16,9 @@ public class SimpleMapContext implements MapContext {
         if (width < 1) throw new RuntimeException("Width cannot be lower than zero: " + width);
         if (height < 1) throw new RuntimeException("Height cannot be lower then zero: " + height);
 
-        this.tiles = new MapTile[width][height];
-        for (int y = 0; y < this.tiles.length; y++) {
-            for (int x = 0; x < this.tiles[y].length; x++) {
+        this.tiles = new MapTile[height][width];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 this.tiles[y][x] = new MapTile();
             }
         }
@@ -64,8 +64,8 @@ public class SimpleMapContext implements MapContext {
 
     @Override
     public void forEachTile(final TileConsumer action) {
-        for (int y = 0; y < this.tiles.length; y++) {
-            for (int x = 0; x < this.tiles[y].length; x++) {
+        for (int y = 0; y < this.height; y++) {
+            for (int x = 0; x < this.width; x++) {
                 action.accept(x, y, this.tiles[y][x]);
             }
         }

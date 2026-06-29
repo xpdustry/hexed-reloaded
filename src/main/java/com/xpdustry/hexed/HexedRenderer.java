@@ -145,10 +145,11 @@ final class HexedRenderer implements PluginListener {
                     builder.append("\n[#").append(team.color).append("]Controlled");
                     final var controller = Groups.player.find(p -> p.team().equals(team));
                     if (controller == null) {
-                        // this.hexed.getLogger().warn("Team {} has no player.", team.name);
-                        continue;
+                        this.hexed.getLogger().warn("Team {} has no player.", team.name);
+                        builder.append(" by [white]Unknown");
+                    } else {
+                        builder.append(" by ").append(controller.plainName());
                     }
-                    builder.append(" by ").append(controller.plainName());
                 } else {
                     builder.append("\n[lightgray][[empty]");
                 }
