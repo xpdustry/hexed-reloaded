@@ -9,7 +9,7 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
-    id("com.diffplug.spotless") version "8.7.0"
+    id("com.diffplug.spotless") version "8.8.0"
     id("net.kyori.indra") version "4.0.0"
     id("net.kyori.indra.git") version "4.0.0"
     id("net.kyori.indra.publishing") version "4.0.0"
