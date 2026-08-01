@@ -44,7 +44,7 @@ dependencies {
 
     implementation("com.xpdustry:distributor-command-cloud:4.2.0")
     implementation("org.incendo:cloud-core:2.0.0")
-    implementation("org.incendo:cloud-annotations:2.0.0")
+    implementation("org.incendo:cloud-annotations:2.1.0")
     compileOnly("com.xpdustry:distributor-common-api:4.2.0")
     compileOnly("org.jspecify:jspecify:1.0.0")
     annotationProcessor("com.uber.nullaway:nullaway:0.13.7")
