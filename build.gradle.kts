@@ -43,7 +43,7 @@ dependencies {
     compileOnly(toxopid.dependencies.arcCore)
 
     implementation("com.xpdustry:distributor-command-cloud:4.2.0")
-    implementation("org.incendo:cloud-core:2.0.0")
+    implementation("org.incendo:cloud-core:2.1.0")
     implementation("org.incendo:cloud-annotations:2.0.0")
     compileOnly("com.xpdustry:distributor-common-api:4.2.0")
     compileOnly("org.jspecify:jspecify:1.0.0")
