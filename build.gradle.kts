@@ -9,13 +9,13 @@ import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
-    id("com.diffplug.spotless") version "8.7.0"
-    id("net.kyori.indra") version "4.0.0"
-    id("net.kyori.indra.git") version "4.0.0"
-    id("net.kyori.indra.publishing") version "4.0.0"
-    id("com.gradleup.shadow") version "9.4.3"
+    id("com.diffplug.spotless") version "8.10.2"
+    id("net.kyori.indra") version "4.1.0"
+    id("net.kyori.indra.git") version "4.1.0"
+    id("net.kyori.indra.publishing") version "4.1.0"
+    id("com.gradleup.shadow") version "9.6.1"
     id("com.xpdustry.toxopid") version "4.2.0"
-    id("net.ltgt.errorprone") version "5.1.0"
+    id("net.ltgt.errorprone") version "5.1.1"
 }
 
 val metadata = ModMetadata.fromJson(rootProject.file("plugin.json"))
